@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-rust@v1
         with:
           rust-version: stable
+          override: true
 
       - name: Run Tests
         working-directory: ./api-gateway
