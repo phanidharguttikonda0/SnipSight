@@ -18,7 +18,7 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let app = routes();
-    tracing::info!("built the Router") ;
+
 
     tracing::info!("Going to start the server") ;
 
