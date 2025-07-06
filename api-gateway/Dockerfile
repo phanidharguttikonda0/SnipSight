@@ -15,7 +15,7 @@ COPY . .
 RUN cargo build --release
 
 # ---- Runtime Stage ----
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 # Add a non-root user (optional)
 RUN adduser --disabled-password --gecos '' rustuser
