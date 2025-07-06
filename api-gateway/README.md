@@ -20,6 +20,6 @@ also there not much traffic , when compared to other services
 
 
 
-
-
+## CI/CD pipeline
+-> [ docker build -t api-gateway . ] for building CI/CD pipeline we use this
 ## Dependencies Explanation
