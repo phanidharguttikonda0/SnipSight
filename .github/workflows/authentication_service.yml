@@ -1,0 +1,52 @@
+### File: .github/workflows/deploy-authentication.yml
+
+name: Deploy Authentication Service
+
+on:
+  push:
+    paths:
+      - 'authentication_app/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+
+      - name: Run Tests
+        working-directory: ./authentication_app
+        run: cargo test --all
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker image
+        working-directory: ./authentication_app
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}
+        run: |
+          IMAGE_TAG=latest
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $(echo ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }} | cut -d'/' -f1)
+            docker stop authentication-container || true
+            docker rm authentication-container || true
+            docker rmi ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest || true
+            docker pull ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest
+            docker run -d --restart unless-stopped --name authentication-container -p 9090:9090 ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest
