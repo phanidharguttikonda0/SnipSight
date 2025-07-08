@@ -1,5 +1,5 @@
 use argon2::{Argon2, PasswordHasher, PasswordVerifier};
-use argon2::password_hash::{SaltString, rand_core::OsRng, PasswordHash};
+use argon2::password_hash::{SaltString, PasswordHash, rand_core::OsRng};
 use chrono::Utc;
 use serde::{Serialize, Deserialize};
 use jsonwebtoken::{encode, Header, EncodingKey};
@@ -35,6 +35,7 @@ pub async fn create_authorization_header(jwt_secret: String,user_id: i32, userna
 
 pub fn hash_password(password: &str) -> String {
     let salt = SaltString::generate(&mut OsRng);
+
     let argon2 = Argon2::default();
     tracing::info!("Hashing password...");
     let password_hash = argon2.hash_password(password.as_bytes(), &salt)
