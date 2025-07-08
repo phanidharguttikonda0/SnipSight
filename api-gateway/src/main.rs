@@ -2,6 +2,7 @@ mod middlewares;
 mod routes;
 mod controllers;
 mod services;
+mod models;
 
 use axum::{middleware, Router};
 use axum::routing::get;
