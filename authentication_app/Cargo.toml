@@ -12,4 +12,5 @@ serde = { version = "1.0.219", features = ["derive"] }
 sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio-rustls", "migrate"] }
 argon2 = "0.5.3"
 jsonwebtoken = "9.3.1" # for creating jwt tokens
-chrono = "0.4.41" # for time expiry specification
+chrono = "0.4.41"
+log = "0.4.27" # for time expiry specification

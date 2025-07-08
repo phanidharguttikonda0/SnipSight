@@ -1,47 +1,22 @@
 mod middlewares;
 mod handlers;
-
-use axum::{Router};
-use axum::routing::{post, get};
+mod state;
 use sqlx::{PgPool, Pool, Postgres};
 use tracing_subscriber;
-use crate::handlers::{get_countries_handler, sign_in_handler, sign_up_handler};
+use authentication_app::create_app;
 
-#[derive(Clone)]
-pub struct AppState {
-    pub db_pool: PgPool,
-    pub jwt_secret: String,
-}
 
-impl AppState {
-    pub fn new(db_pool: PgPool, jwt_secret: String) -> Self {
-        AppState {
-            db_pool, jwt_secret
-        }
-    }
-}
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
     // input validation is done in the api-gateway itself
 
-
     tracing::info!("going to create rds database connection");
     if let Some(rds_connection) = create_connection(get_rds_url().await).await
     {
         let jwt_secret = get_jwt_key().await ;
-        let app = Router::new()
-            .route("/", get(|| async {
-                "Just a Test whether Server working properly or not"
-            }))
-            .route("/sign-in/{username}/{password}", post(sign_in_handler))
-            .route("/sign-up/{username}/{password}/{mail_id}/{mobile}/{country_id}", post(sign_up_handler))
-            .route("/get-countries", get(get_countries_handler))
-            .with_state(AppState::new(rds_connection, jwt_secret))
-            ;
-
-
+        let app = create_app(rds_connection, jwt_secret);
 
         let tcp_listener = tokio::net::TcpListener::bind("0.0.0.0:9090").await.unwrap();
         tracing::info!("Listening on {}", tcp_listener.local_addr().unwrap());

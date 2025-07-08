@@ -3,7 +3,7 @@ use axum::{Form, Json};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use serde::{Serialize, Deserialize};
-use crate::AppState;
+use crate::state::AppState;
 use crate::middlewares::{create_authorization_header, hash_password, verify_password};
 
 #[derive(Serialize)]
@@ -40,7 +40,7 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
             let isSame = verify_password(&password,&row.2) ;
             if isSame {
                 tracing::info!("Correct credentials {:?}", row) ;
-                let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1).await;
+                let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
 
                 Ok((
                     StatusCode::OK,
@@ -95,7 +95,7 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
 
    match user {
        Ok(user)=> {
-           let header = create_authorization_header(String::from(&state.jwt_secret),user.0,username).await;
+           let header = create_authorization_header(String::from(&state.jwt_secret),user.0,username);
            tracing::info!("New User Created Successfully");
            Ok((
                StatusCode::OK,

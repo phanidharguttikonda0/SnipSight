@@ -18,7 +18,7 @@ impl Claims{
     }
 }
 
-pub async fn create_authorization_header(jwt_secret: String,user_id: i32, username: String) -> String {
+pub fn create_authorization_header(jwt_secret: String,user_id: i32, username: String) -> String {
     let expiration = Utc::now()
         .checked_add_signed(chrono::Duration::days(7)).expect("error in expiration time")
         .timestamp() as usize;
@@ -49,4 +49,35 @@ pub fn verify_password(password: &str, hash: &str) -> bool {
     tracing::info!("Verifying password...");
     let parsed_hash = PasswordHash::new(hash).expect("Invalid hash");
     Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
+}
+
+
+// if we mention #[cfg(test)] then docker will not copy the following code, when copying the file right
+#[cfg(test)]
+mod tests {
+    use super::*; // what does this do ?
+
+    #[test]
+    fn test_authorization_header_creation(){
+        tracing_subscriber::fmt().init();
+        tracing::info!("Creating authorization header...");
+        let header = create_authorization_header(
+            String::from("phani"), 1, String::from("phanidhar"));
+        tracing::info!("Header was : {:?}", header);
+    }
+
+    #[test]
+    fn test_password_hash_verification() {
+        tracing_subscriber::fmt().init();
+        let hashed_password = hash_password("phani") ;
+        tracing::info!("Hashed password was : {:?}", hashed_password);
+        let is_correct = verify_password("phani", &hashed_password) ;
+        assert!(is_correct);
+    }
+
+    // why async functions are not used in tests ?
+    /*
+        Answer : we can use async functions in tests but we need to use a async test runtime
+        like #[tokio::test]
+    */
 }
