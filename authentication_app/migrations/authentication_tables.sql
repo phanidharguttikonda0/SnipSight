@@ -4,7 +4,7 @@ CREATE TABLE users (
     mail_id varchar(320) unique not null,
     mobile varchar(10) unique not null,
     country_id fk not null,
-    password varchar(64) not null -- storing sha256 hash
+    password TEXT not null -- storing argon2 hash (which slow but highly secure)
 );
 
 create table country (

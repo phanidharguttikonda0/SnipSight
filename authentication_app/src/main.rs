@@ -5,7 +5,7 @@ use axum::{Router};
 use axum::routing::{post, get};
 use sqlx::{PgPool, Pool, Postgres};
 use tracing_subscriber;
-use crate::handlers::{sign_in_handler, sign_up_handler};
+use crate::handlers::{get_countries_handler, sign_in_handler, sign_up_handler};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -37,6 +37,7 @@ async fn main() {
             }))
             .route("/sign-in/{username}/{password}", post(sign_in_handler))
             .route("/sign-up/{username}/{password}/{mail_id}/{mobile}/{country_id}", post(sign_up_handler))
+            .route("/get-countries", get(get_countries_handler))
             .with_state(AppState::new(rds_connection, jwt_secret))
             ;
 

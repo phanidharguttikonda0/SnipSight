@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use serde::{Serialize, Deserialize};
 use crate::AppState;
-use crate::middlewares::create_authorization_header;
+use crate::middlewares::{create_authorization_header, hash_password, verify_password};
 
 #[derive(Serialize)]
 pub struct Header {
@@ -15,23 +15,51 @@ pub struct ErrorResponse{
     error: String,
 }
 
+#[derive(Serialize, sqlx::FromRow)]
+pub struct  Country{
+    id: i32,
+    country: String,
+    code: String,
+}
+
+#[derive(Serialize)]
+pub struct FullCountries {
+    countries: Vec<Country>,
+}
+
 pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, password)): Path<(String, String)>)
                              -> Result<impl IntoResponse, impl IntoResponse>
 {
 
     // here we call the service that access the database
-    let row: Result<(i32,String),_>  = sqlx::query_as("select id,username from users where (username=$1 OR mail_id=$2) AND password=$3")
-        .bind(&username).bind(&username).bind(password).fetch_one(&state.db_pool).await ;
+    let row: Result<(i32,String, String),_>  = sqlx::query_as("select id,username,password from users where username=$1 OR mail_id=$2")
+        .bind(&username).bind(&username).bind(&password).fetch_one(&state.db_pool).await ;
 
     match row {
         Ok(row) => {
-            tracing::info!("Correct credentials {:?}", row) ;
-            let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1).await;
+            let isSame = verify_password(&password,&row.2) ;
+            if isSame {
+                tracing::info!("Correct credentials {:?}", row) ;
+                let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1).await;
 
-            Ok((
-                StatusCode::OK,
-                Json(Header { header })
-            ))
+                Ok((
+                    StatusCode::OK,
+                    Json(Header { header })
+                ))
+            }else{
+                tracing::info!("Invalid Credentials") ;
+                Err(
+                    (
+                        StatusCode::NOT_FOUND,
+                        Json(
+                            ErrorResponse{
+                                error: "Invalid Password".to_string()
+                            }
+                        )    
+                    )
+                )
+            }
+            
         },
         Err(err) => {
             tracing::error!("error was {}", err);
@@ -50,7 +78,7 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
 pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, password, mail_id, mobile, country_id)): Path<(String, String, String, String, i32)>)
                              -> Result<impl IntoResponse, impl IntoResponse>
 {
-
+    let hash_password = hash_password(&password) ;
     // here we call the service that access the database
     let user: Result<(i32,),_> = sqlx::query_as(
         "INSERT INTO users (username, mail_id, password, mobile, country_id)
@@ -59,7 +87,7 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
     )
         .bind(&username)
         .bind(&mail_id)
-        .bind(&password)
+        .bind(&hash_password)
         .bind(&mobile)
         .bind(&country_id)
         .fetch_one(&state.db_pool)  // Fetch the row
@@ -84,6 +112,38 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
            ))
        }
    }
-    
-    
+}
+
+
+pub async fn get_countries_handler(State(state): State<AppState>) -> Result<impl IntoResponse, impl IntoResponse> {
+
+    // getting all the countries
+    let countries: Result<Vec<Country>,_> = sqlx::query_as::<_,Country>("select * from countries")
+        .fetch_all(&state.db_pool).await ;
+
+    match countries {
+        Ok(countries) => {
+            tracing::info!("Countries we got the data") ;
+            Ok(
+                (StatusCode::OK,
+                    Json(
+                        FullCountries {
+                            countries
+                        }
+                    )
+                )
+            )
+
+        },
+        Err(error) => {
+            tracing::error!("unable to get the countries data") ;
+            Err(
+                (StatusCode::INTERNAL_SERVER_ERROR,
+                 Json(ErrorResponse {
+                     error: "unable to get the data from database".to_string(),
+                 })
+                )
+            )
+        }
+    }
 }
