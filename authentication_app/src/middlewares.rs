@@ -68,7 +68,6 @@ mod tests {
 
     #[test]
     fn test_password_hash_verification() {
-        tracing_subscriber::fmt().init();
         let hashed_password = hash_password("phani") ;
         tracing::info!("Hashed password was : {:?}", hashed_password);
         let is_correct = verify_password("phani", &hashed_password) ;
