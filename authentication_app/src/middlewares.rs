@@ -45,16 +45,27 @@ pub fn hash_password(password: &str) -> String {
     password_hash
 }
 
-pub fn verify_password(password: &str, hash: &str) -> bool {
+pub fn verify_password(password: &str, hash: &str) -> Result<bool,bool> {
     tracing::info!("Verifying password...");
-    let parsed_hash = PasswordHash::new(hash).expect("Invalid hash");
-    Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
+    let parsed_hash = PasswordHash::new(hash);
+    match parsed_hash {
+        Ok(parsed_hash) => {
+            Ok(Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok())
+        },
+        Err(_) => Err(false)
+    }
+
 }
 
 
 // if we mention #[cfg(test)] then docker will not copy the following code, when copying the file right
 #[cfg(test)]
 mod tests {
+    /*
+        where tests doesn't execute in a order so , we need to figure out
+        how to intialize the tracing subscriber only once.
+    */
+
     use super::*; // what does this do ?
 
     #[test]
@@ -71,7 +82,7 @@ mod tests {
         let hashed_password = hash_password("phani") ;
         tracing::info!("Hashed password was : {:?}", hashed_password);
         let is_correct = verify_password("phani", &hashed_password) ;
-        assert!(is_correct);
+        assert!(matches!(is_correct, Ok(true)));
     }
 
     // why async functions are not used in tests ?

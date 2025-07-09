@@ -38,33 +38,52 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
     match row {
         Ok(row) => {
             let isSame = verify_password(&password,&row.2) ;
-            if isSame {
-                tracing::info!("Correct credentials {:?}", row) ;
-                let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
 
-                Ok((
-                    StatusCode::OK,
-                    Json(Header { header })
-                ))
-            }else{
-                tracing::info!("Invalid Credentials") ;
-                Err(
-                    (
-                        StatusCode::NOT_FOUND,
-                        Json(
-                            ErrorResponse{
-                                error: "Invalid Password".to_string()
-                            }
-                        )    
+            match isSame {
+                Ok(isSame) => {
+                    if isSame {
+                        tracing::info!("Correct credentials {:?}", row) ;
+                        let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
+
+                        Ok((
+                            StatusCode::OK,
+                            Json(Header { header })
+                        ))
+                    }else{
+                        tracing::info!("Invalid Credentials") ;
+                        Err(
+                            (
+                                StatusCode::NON_AUTHORITATIVE_INFORMATION,
+                                Json(
+                                    ErrorResponse{
+                                        error: "Invalid Password".to_string()
+                                    }
+                                )
+                            )
+                        )
+                    }
+                },
+                Err(_) => {
+                    tracing::info!("not a argon2 hash") ;
+                    Err(
+                        (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(
+                                ErrorResponse{
+                                    error: "not a argon2 hash".to_string()
+                                }
+                            )
+                        )
                     )
-                )
+                }
             }
+
             
         },
         Err(err) => {
             tracing::error!("error was {}", err);
             Err((
-                StatusCode::NOT_FOUND,
+                StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse {
                     error: "Incorrect Credentials".to_string(),
                 }),
@@ -82,8 +101,8 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
     // here we call the service that access the database
     let user: Result<(i32,),_> = sqlx::query_as(
         "INSERT INTO users (username, mail_id, password, mobile, country_id)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id"
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id"
     )
         .bind(&username)
         .bind(&mail_id)

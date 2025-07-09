@@ -14,7 +14,7 @@ from your tests!
 */
 
 mod handlers;
-mod middlewares;
+pub mod middlewares;
 use axum::Router;
 use axum::routing::{get, post};
 use sqlx::{PgPool, Pool, Postgres};
@@ -27,8 +27,8 @@ pub fn create_app(rds_connection: Pool<Postgres>, jwt_secret: String) -> Router 
         .route("/", get(|| async {
             "Just a Test whether Server working properly or not"
         }))
-        .route("/sign-in/{username}/{password}", post(sign_in_handler))
-        .route("/sign-up/{username}/{password}/{mail_id}/{mobile}/{country_id}", post(sign_up_handler))
+        .route("/sign-in/{username}/{password}", get(sign_in_handler))
+        .route("/sign-up/{username}/{password}/{mail_id}/{mobile}/{country_id}", get(sign_up_handler))
         .route("/get-countries", get(get_countries_handler))
         .with_state(AppState::new(rds_connection, jwt_secret))
 }
