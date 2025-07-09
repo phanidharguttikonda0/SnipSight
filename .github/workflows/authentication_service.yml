@@ -28,11 +28,11 @@ jobs:
 
       - name: Install Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo systemctl start docker
-          sudo systemctl enable docker
+          curl -fsSL https://get.docker.com | sh
           sudo usermod -aG docker $USER
+          sudo systemctl enable docker
+          sudo systemctl start docker
+
 
       - name: Run PostgreSQL container
         run: |
