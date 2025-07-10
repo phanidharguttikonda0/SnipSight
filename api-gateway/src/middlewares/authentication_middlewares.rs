@@ -1,15 +1,19 @@
 
 use axum::middleware::Next;
-use axum::{extract::Request} ;
+use axum::{extract::{Request}, response::Response} ;
+use axum::body::{to_bytes, Body, Bytes};
+use axum::http::StatusCode;
+use crate::models::responses::ErrorResponse;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use validator::ValidationError;
+use validator::{Validate, ValidationError};
 use regex::Regex;
-use crate::models::authentication_models::Claims;
+use crate::models::authentication_models::{Claims, Login, Register};
 
 
 // We are going to use the OAuth
-pub async fn authorization_check(mut req: Request, next: Next) {
-    
+pub async fn authorization_check(mut req: Request, next: Next) -> Result<Response, (StatusCode, ErrorResponse)> {
+    // let's learn about how do we design a response for the whole application
+    Ok(next.run(req).await)
 }
 
 pub async fn check_authorization_header(jwt_secret: String, header: String) -> Result<(i32, String), bool> {
@@ -28,6 +32,65 @@ pub async fn check_authorization_header(jwt_secret: String, header: String) -> R
             Err(false)
         }
     }
+}
+
+pub async fn sign_in_check(mut req: Request, next: Next) -> Result<Response, (StatusCode,ErrorResponse)>{
+    let (mut parts, body) = req.into_parts() ;
+    tracing::info!("body was {:?}", body);
+    tracing::info!("parts were {:?}", parts);
+    // we need to parse the body and get the actual form data
+    let bytes:Bytes = match to_bytes(body, usize::MAX).await {
+        Ok(bytes) => bytes,
+        Err(err) => return Err((StatusCode::BAD_REQUEST, ErrorResponse{
+            message: format!("Error while parsing the body: {}", err),
+        }))
+    };
+
+    let form_data: Login = match serde_urlencoded::from_bytes(&bytes) {
+        Ok(form) => form,
+        Err(_) => return Err((
+            StatusCode::BAD_REQUEST,
+            ErrorResponse { message: "Invalid form data".to_string() }
+        )),
+    };
+
+    if let Err(validation_error) = validate_username_or_mail_id_check(&form_data.username) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            ErrorResponse { message: validation_error.to_string() }
+        ));
+    }
+
+    Ok(next.run(Request::from_parts(parts,Body::from(bytes.clone()))).await)
+}
+
+pub async fn sign_up_check(mut req: Request, next: Next) -> Result<Response, (StatusCode,ErrorResponse)>{
+    let (mut parts, body) = req.into_parts() ;
+
+    let bytes = match to_bytes(body, usize::MAX).await {
+        Ok(bytes) => bytes,
+        Err(err) => return Err((StatusCode::BAD_REQUEST, ErrorResponse{
+            message: format!("Error while parsing the body: {}", err),
+        }))
+    } ;
+
+    let form_data: Register = match serde_urlencoded::from_bytes(&bytes) {
+        Ok(form) => form,
+        Err(_) => return Err((
+            StatusCode::BAD_REQUEST,
+            ErrorResponse { message: "Invalid form data".to_string() }
+        )),
+    };
+
+    if let Err(validation_error) = form_data.validate() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            ErrorResponse { message: validation_error.to_string() }
+        ));
+    }
+
+    Ok(next.run(Request::from_parts(parts,Body::from(bytes.clone()))).await)
+
 }
 
 pub async fn example_middleware(req: Request, next: Next) {

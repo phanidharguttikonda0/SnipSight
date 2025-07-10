@@ -17,6 +17,10 @@ the http communication for easy form handling and
 also there not much traffic , when compared to other services
 
 
+## Response Logic
+
+We are going to return the response same what the authentication service returns
+And for the Remaining Services need to be figure out
 
 
 
