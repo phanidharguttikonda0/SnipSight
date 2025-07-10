@@ -6,7 +6,7 @@ mod models;
 
 use axum::{middleware, Router};
 use axum::routing::get;
-use middlewares::gate_way_middlewares ;
+use middlewares::authentication_middlewares;
 use crate::routes::authentication_routes::authentication_routes;
 use crate::routes::file_sharing_routes::file_sharing_routes;
 use crate::routes::payments_routes::payment_routes;
@@ -34,7 +34,7 @@ async fn main() {
 
 fn routes() -> Router {
     Router::new()
-        .route("/example", get(|| async { "Basic Route" }).layer(middleware::from_fn(gate_way_middlewares::example_middleware)))
+        .route("/example", get(|| async { "Basic Route" }).layer(middleware::from_fn(authentication_middlewares::example_middleware)))
         .route("/{shorten_url}", get(|| async {
             tracing::info!("this route takes care of the url's whether it gonna be file sharing or shorten url website");
         }))

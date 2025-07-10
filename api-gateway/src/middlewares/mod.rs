@@ -1,1 +1,1 @@
-pub mod gate_way_middlewares;
+pub mod authentication_middlewares;
