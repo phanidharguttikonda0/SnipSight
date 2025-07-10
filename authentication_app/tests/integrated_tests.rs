@@ -82,7 +82,7 @@ async fn sign_up_check() {
     tracing::info!("response was let me check it out");
 
     assert_eq!(response1.status(), StatusCode::CONFLICT);
-    assert_eq!(response2.status(), StatusCode::OK);
+    assert_eq!(response2.status(), StatusCode::CREATED);
 }
 
 

@@ -117,7 +117,7 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
            let header = create_authorization_header(String::from(&state.jwt_secret),user.0,username);
            tracing::info!("New User Created Successfully");
            Ok((
-               StatusCode::OK,
+               StatusCode::CREATED,
                Json(Header { header })
            ))
        },
