@@ -90,4 +90,4 @@ jobs:
             docker rm authentication-container || true
             docker rmi ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest || true
             docker pull ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest
-            docker run -d --restart unless-stopped --name authentication-container -p 9090:9090 ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest
+            docker run -d --restart unless-stopped --name authentication-container --network snip-sight-network -p 9090:9090 ${{ secrets.ECR_REPOSITORY_AUTH_SERVICE }}:latest
