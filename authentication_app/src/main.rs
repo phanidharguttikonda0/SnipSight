@@ -30,7 +30,7 @@ async fn main() {
 
 async fn get_rds_url() -> String {
     // here we need to get the urls from the aws secret manager or what ever we use
-    String::from("")
+    String::from("postgres://postgres:Phani9090Kl@snipshare.cbigqkgesirb.ap-south-1.rds.amazonaws.com:5432/authentication_app")
 }
 
 async fn get_jwt_key() -> String {
