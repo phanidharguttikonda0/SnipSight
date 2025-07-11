@@ -80,7 +80,7 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
         Err(err) => {
             tracing::error!("error was {}", err);
             Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
+                StatusCode::UNAUTHORIZED,
                 Json(ErrorResponse {
                     error: "Incorrect Credentials".to_string(),
                 }),
