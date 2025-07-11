@@ -27,6 +27,7 @@ pub struct Register{
     pub mail_id: String,
     #[validate(length(min = 10, max = 10))]
     #[validate(custom(function="validate_digits_only", message = "Invalid mobile number"))]
-    pub mobile: String
+    pub mobile: String,
+    pub country_id : i32
 }
 
