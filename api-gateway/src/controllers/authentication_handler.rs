@@ -17,7 +17,7 @@ pub async fn sign_in(Form(login) :Form<Login>) -> Result<impl IntoResponse, impl
             Ok(response_creator(response).await)
         },
         Err(error) => {
-            tracing::error!("Error was : {}", error);
+            tracing::error!(" ---> Error was : {}", error);
             tracing::error!("Where the error was occurred because of not able to get the response from the authentication server ");
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -39,7 +39,7 @@ pub async fn sign_up(Form(register) :Form<Register>) -> impl IntoResponse{
             Ok(response_creator(response).await)
         },
         Err(error) => {
-            tracing::error!("Error was : {}", error);
+            tracing::error!(" ---> Error was : {}", error);
             tracing::error!("Where the error was occurred because of not able to get the response from the authentication server ");
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
