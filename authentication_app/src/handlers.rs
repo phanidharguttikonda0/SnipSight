@@ -1,15 +1,11 @@
 use axum::extract::{Path, State};
 use axum::{Form, Json};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use serde::{Serialize, Deserialize};
 use crate::state::AppState;
 use crate::middlewares::{create_authorization_header, hash_password, verify_password};
 
-#[derive(Serialize)]
-pub struct Header {
-    header: String,
-}
 #[derive(Serialize)]
 pub struct ErrorResponse{
     error: String,
@@ -44,10 +40,11 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
                     if isSame {
                         tracing::info!("Correct credentials {:?}", row) ;
                         let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
-
+                        let mut headers = HeaderMap::new() ;
+                        headers.insert("Authorization", HeaderValue::from_str(&header).unwrap()) ;
                         Ok((
                             StatusCode::OK,
-                            Json(Header { header })
+                            headers
                         ))
                     }else{
                         tracing::info!("Invalid Credentials") ;
@@ -116,9 +113,11 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
        Ok(user)=> {
            let header = create_authorization_header(String::from(&state.jwt_secret),user.0,username);
            tracing::info!("New User Created Successfully");
+           let mut headers = HeaderMap::new();
+           headers.insert("Authorization", HeaderValue::from_str(&header).unwrap()) ;
            Ok((
                StatusCode::CREATED,
-               Json(Header { header })
+               headers
            ))
        },
        Err(error) => {
