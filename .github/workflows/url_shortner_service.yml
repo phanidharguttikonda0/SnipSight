@@ -60,4 +60,4 @@ jobs:
             docker rm url-shortner-container || true
             docker rmi ${{ secrets.ECR_REPOSITORY_URL_SHORTNER }}:latest || true
             docker pull ${{ secrets.ECR_REPOSITORY_URL_SHORTNER }}:latest
-            docker run -d --restart unless-stopped --name url-shortner-container -p 9091:9091 ${{ secrets.ECR_REPOSITORY_URL_SHORTNER }}:latest
+            docker run -d --restart unless-stopped --name url-shortner-container --network snip-sight-network -p 9091:9091 ${{ secrets.ECR_REPOSITORY_URL_SHORTNER }}:latest
