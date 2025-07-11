@@ -17,6 +17,9 @@ RUN cargo build --release
 # ---- Runtime Stage ----
 FROM debian:bookworm-slim
 
+# Install OpenSSL 3 runtime libraries
+RUN apt update && apt install -y libssl3 ca-certificates && apt clean
+
 # Add a non-root user (optional)
 RUN adduser --disabled-password --gecos '' rustuser
 

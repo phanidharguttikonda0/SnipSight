@@ -12,8 +12,7 @@ use authentication_app::middlewares::hash_password;
 async fn create_db() -> Pool<Postgres> {
     PgPool::connect("postgres://postgres:phani@localhost:5432/authentication").await.unwrap()
 }
-// sqlx migrate run --database-url postgres://postgres:phani@localhost:5432/authentication
-//
+
 async fn create_user(db: Pool<Postgres>,username: String, mut password: String, mail_id: String, mobile: String) {
     db.execute("delete from users").await.unwrap() ;
 
