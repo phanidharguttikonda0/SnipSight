@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package url_shortner; // Identity that triggers this API
+
+
+
+service UrlShortnerService {
+
+  rpc CreateShortenUrl(CreateShortenUrlPayload) returns (Shorten);
+}
+
+message CreateShortenUrlPayload {
+  string original_url = 1; // represents it was the field number - 1
+  string custom_url = 2; // it may null as well
+}
+
+message Shorten {
+  string shorten_url = 1 ;
+}
