@@ -2,7 +2,7 @@
 use tonic::{Request, Response, Status};
 use tonic::transport::Server;
 use shortner::url_shortner_service_server::{UrlShortnerService, UrlShortnerServiceServer};
-use shortner::{CreateShortenUrlPayload, Shorten};
+use shortner::{CreateShortenUrlPayload, Shorten}; // these messages acts like structs
 
 pub mod shortner {
     tonic::include_proto!("url_shortner");
