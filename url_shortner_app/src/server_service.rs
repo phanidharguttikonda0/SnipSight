@@ -1,6 +1,8 @@
 use tonic::{Request, Response, Status};
 use shortner::url_shortner_service_server::{UrlShortnerService};
-use shortner::{CreateShortenUrlPayload, Shorten}; // the message payloads are converted to structs, this is why gRPC is any language supporter
+use shortner::{CreateShortenUrlPayload, Shorten};
+use crate::server_service::shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
+// the message payloads are converted to structs, this is why gRPC is any language supporter
 
 pub mod shortner {
     tonic::include_proto!("url_shortner");
@@ -19,6 +21,18 @@ impl UrlShortnerService for UrlShortnerServer{
         };
 
         Ok(Response::new(reply))
+    }
+
+    async fn delete_shorten_url(&self, request: Request<UrlId>) -> Result<Response<SuccessMessage>, Status> {
+        todo!()
+    }
+
+    async fn update_shorten_url(&self, request: Request<CustomName>) -> Result<Response<UpdatedCustomName>, Status> {
+        todo!()
+    }
+
+    async fn get_shorten_urls_list(&self, request: Request<User>) -> Result<Response<UrlsList>, Status> {
+        todo!()
     }
 }
 

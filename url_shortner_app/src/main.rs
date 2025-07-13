@@ -19,3 +19,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+
+async fn get_database_connection_urls() -> (String, String) {
+    (String::from("Postgres-SQL"), String::from("Dynamo-DB"))
+}
+
+async fn create_database_connections() {
+    let (postgres_url, dynamo_url) = get_database_connection_urls().await;
+    println!(
+        "Postgres-SQL: {} \n Dynamo-DB: {}",
+        postgres_url, dynamo_url
+    )
+}

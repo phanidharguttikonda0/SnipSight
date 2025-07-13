@@ -8,7 +8,7 @@ tonic = "0.13.1" # is a gRPC implementation for rust
 prost = "0.13.1" # is a protoBuffer implementation for rust
 tokio = { version = "1.46.1", features = ["full"] }
 tonic-reflection = "0.13.1" # to read gRPC defination at run-time
-prost-types = "0.14.1"
+prost-types = "0.13.1" # making sure using the same version
 
 [build-dependencies]
 tonic-build = "0.13.1"
