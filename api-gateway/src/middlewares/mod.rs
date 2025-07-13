@@ -1,3 +1,4 @@
 pub mod authentication_middlewares;
 pub mod response_creator;
-mod common_middlewares;
+pub mod common_middlewares;
+pub mod url_shortner_middlewares;

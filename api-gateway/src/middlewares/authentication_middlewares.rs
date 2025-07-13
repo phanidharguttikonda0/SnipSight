@@ -1,19 +1,45 @@
-
+use std::sync::Arc;
 use axum::middleware::Next;
 use axum::{extract::{Request}, response::Response} ;
 use axum::body::{to_bytes, Body, Bytes};
+use axum::extract::State;
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use crate::models::responses::ErrorResponse;
 use jsonwebtoken::{decode, DecodingKey, Validation};
+use axum::Json;
 use validator::{Validate, ValidationError};
 use regex::Regex;
 use crate::models::authentication_models::{Claims, Login, Register};
-
+use crate::AppState;
 
 // We are going to use the OAuth
-pub async fn authorization_check(mut req: Request, next: Next) -> Result<Response, (StatusCode, ErrorResponse)> {
+pub async fn authorization_check(State(state): State<AppState>, mut req: Request, next: Next) -> Result<Response, impl IntoResponse> {
     // let's learn about how do we design a response for the whole application
-    Ok(next.run(req).await)
+    let jwt_secret = state.secret_key ;
+    let secret = String::from(jwt_secret.as_str());
+    match req.headers().get("Authorization") {
+        Some(header) => {
+            let result = check_authorization_header(secret, String::from(header.to_str().unwrap())).await ;
+            match result {
+                Ok(claims) => {
+                    tracing::info!("claims: {:?}", claims);
+                    req.extensions_mut().insert(claims);
+                    Ok(next.run(req).await)
+                },
+                Err(error) => {
+                    tracing::error!("error was {:?}", error);
+                    Err((
+                        StatusCode::UNAUTHORIZED, Json(ErrorResponse { message: String::from("Invalid Header") })
+                        ))
+                }
+            }
+        },
+        None => {
+            tracing::info!("No Authorization Header Provided");
+            Err((StatusCode::UNAUTHORIZED, Json(ErrorResponse{message: String::from("Please Provide Authorization header")})))
+        }
+    }
 }
 
 pub async fn check_authorization_header(jwt_secret: String, header: String) -> Result<(i32, String), bool> {

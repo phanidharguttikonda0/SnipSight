@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 use crate::middlewares::authentication_middlewares::{validate_digits_only, validate_username_or_mail_id_check, username_check};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims{
     pub user_id: i32,
     pub username: String,

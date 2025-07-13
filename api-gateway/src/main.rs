@@ -7,10 +7,15 @@ mod models;
 use axum::{middleware, Router};
 use axum::routing::get;
 use middlewares::authentication_middlewares;
+use crate::middlewares::authentication_middlewares::authorization_check;
 use crate::routes::authentication_routes::authentication_routes;
 use crate::routes::file_sharing_routes::file_sharing_routes;
 use crate::routes::payments_routes::payment_routes;
-use crate::routes::url_shortner_routes::url_shortner_routes;
+use crate::routes::url_shortner_routes::{url_shortner_routes};
+#[derive(Clone)]
+pub struct AppState {
+    pub secret_key: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -18,7 +23,7 @@ async fn main() {
 
     tracing_subscriber::fmt::init();
 
-    let app = routes();
+    let app = routes().await ;
     tracing::info!("built the Router") ;
 
     tracing::info!("Going to start the server") ;
@@ -32,14 +37,19 @@ async fn main() {
 
 
 
-fn routes() -> Router {
+async fn routes() -> Router {
+    let secret = get_jwt_secret().await;
     Router::new()
-        .route("/example", get(|| async { "Basic Route" }).layer(middleware::from_fn(authentication_middlewares::example_middleware)))
         .route("/{shorten_url}", get(|| async {
             tracing::info!("this route takes care of the url's whether it gonna be file sharing or shorten url website");
         }))
-        .nest("/authentication", authentication_routes())
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())
+        .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
+        .nest("/authentication", authentication_routes())
+}
+
+async fn get_jwt_secret() -> String {
+    String::from("secret")
 }
