@@ -30,5 +30,5 @@ async fn create_database_connections() {
     println!(
         "Postgres-SQL: {} \n Dynamo-DB: {}",
         postgres_url, dynamo_url
-    )
+    );
 }
