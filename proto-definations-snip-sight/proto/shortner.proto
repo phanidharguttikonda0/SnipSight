@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package url_shortner; // Identity that triggers this API
+
+import "google/protobuf/timestamp.proto";
+
+
+service UrlShortnerService {
+
+  rpc CreateShortenUrl(CreateShortenUrlPayload) returns (Shorten);
+  rpc DeleteShortenUrl(UrlId) returns(SuccessMessage);
+  rpc UpdateShortenUrl(CustomName) returns(UpdatedCustomName);
+  rpc getShortenUrlsList(User) returns(UrlsList) ;
+  // from here we need to design the key insights sharing , how it gonna reach other side
+}
+
+
+
+message User {
+  int64 user_id = 1 ;
+  uint32 pageNumber = 2;
+  uint32 pageSize = 3;
+} // we use LIMIT and OFFSET to do this task
+
+message UrlsList {
+  repeated Urls list = 1; // it's become a Vec<Urls>
+}
+
+message Urls {
+  int64  id = 1; // id of the row
+  string original_url = 2;
+  string shorten_url = 3;
+  string view_count = 4;
+  google.protobuf.Timestamp created_at = 5; // here we need to change the type to timestamp
+}
+
+message CustomName {
+  int64 id = 1;
+  int64 user_id = 2;
+  string custom_name = 3; // the new custom name, before that we need to check whether the user was premium member or having credits at least
+}
+
+message UpdatedCustomName {
+  string new_name = 1; // if length was 0, then the below cause will not be zero length
+  string cause = 2;
+}
+
+message UrlId{
+  int64 id = 1; // id of the url
+  int64 user_id = 2; // it helps to check whether the id belongs to the specific user-id or not
+}
+
+message SuccessMessage {
+  bool operation = 1; // it tells operations was successfull or not
+  string cause = 2; // if fails it tells the cause else mentions Success
+}
+
+message CreateShortenUrlPayload {
+  string original_url = 1; // represents it was the field number - 1
+  string custom_url = 2; // it may null as well
+  int64 user_id = 3;
+}
+
+message Shorten {
+  string shorten_url = 1 ;
+}

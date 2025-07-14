@@ -1,0 +1,16 @@
+[package]
+name = "proto-definations-snip-sight"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+description = "Shared gRPC definations for SnipSight services"
+license = "MIT"
+repository = ""
+
+[dependencies]
+tonic = "0.13.1" # is a gRPC implementation for rust
+prost = "0.13.1" # is a protoBuffer implementation for rust
+prost-types = "0.13.1" # making sure using the same version
+
+[build-dependencies]
+tonic-build = "0.13.1"
