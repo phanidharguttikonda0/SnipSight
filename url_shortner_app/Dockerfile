@@ -1,44 +1,36 @@
 # ---- Build Stage ----
 FROM rust:1.86.0 as builder
 
-# Install protoc and build dependencies
-RUN apt-get update && apt-get install -y \
-    protobuf-compiler \
-    pkg-config \
-    libssl-dev \
-    build-essential \
-    && apt-get clean
-
-# Set working directory
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Copy manifests and partial code to cache deps
+# Copy Cargo files first to cache dependencies
 COPY Cargo.toml Cargo.lock ./
-COPY build.rs ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release || true
-RUN rm -rf src
 
-# Copy the full source code
+
+# Copy the entire source code
 COPY . .
 
-# Build your app
+# Build the application in release mode
 RUN cargo build --release
 
 # ---- Runtime Stage ----
 FROM debian:bookworm-slim
 
-# Install runtime dependencies
+# Install OpenSSL 3 runtime libraries
 RUN apt update && apt install -y libssl3 ca-certificates && apt clean
 
-# Create non-root user
+# Add a non-root user (optional)
 RUN adduser --disabled-password --gecos '' rustuser
 
-# Copy compiled binary
+# Copy the compiled binary from the builder
 COPY --from=builder /usr/src/app/target/release/url_shortner_app /usr/local/bin/url_shortner_app
 
-# Set user and expose port
+# Switch to the non-root user
 USER rustuser
+
+# Expose the port your app listens on (adjust accordingly)
 EXPOSE 9091
 
+# Start your app
 CMD ["url_shortner_app"]
