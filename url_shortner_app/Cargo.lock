@@ -634,6 +634,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-definations-snip-sight"
+version = "0.1.0"
+source = "git+https://github.com/phanidharguttikonda0/SnipSight.git?tag=v0.1.0#347d4f4d8f6a263864e5d7273fbfab84497a5075"
+dependencies = [
+ "prost",
+ "prost-types",
+ "tonic",
+ "tonic-build",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -989,6 +1000,7 @@ version = "0.1.0"
 dependencies = [
  "prost",
  "prost-types",
+ "proto-definations-snip-sight",
  "tokio",
  "tonic",
  "tonic-build",

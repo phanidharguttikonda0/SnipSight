@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+proto-definations-snip-sight = {git = "https://github.com/phanidharguttikonda0/SnipSight.git", tag = "v0.1.0", package = "proto-definations-snip-sight"}
 tonic = "0.13.1" # is a gRPC implementation for rust
 prost = "0.13.1" # is a protoBuffer implementation for rust
 tokio = { version = "1.46.1", features = ["full"] }

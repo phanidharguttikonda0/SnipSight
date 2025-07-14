@@ -1,5 +1,5 @@
 mod server_service;
-use server_service::shortner::url_shortner_service_server::UrlShortnerServiceServer;
+use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::UrlShortnerServiceServer;
 use server_service::UrlShortnerServer;
 
 
