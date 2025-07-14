@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+proto-definitions-snip-sight = { git = "https://github.com/phanidharguttikonda0/SnipSight.git", tag = "v0.1.0", package = "proto-definations-snip-sight" }
 axum = "0.8.4"
 tracing = "0.1.41"
 tokio = {version = "1.46.1", features = ["full"]}
@@ -16,3 +17,4 @@ regex = "1.11.1"
 hyper = { version = "1.6.0", features = ["full"] }
 serde_urlencoded = "0.7.1"
 reqwest = {version = "0.12.22", features = ["json"]}
+tonic = "0.13.1"
