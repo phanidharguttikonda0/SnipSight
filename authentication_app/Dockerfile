@@ -1,6 +1,14 @@
 # ---- Build Stage ----
 FROM rust:1.86.0 as builder
 
+# Install protoc and build dependencies
+RUN apt-get update && apt-get install -y \
+    protobuf-compiler \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    && apt-get clean \
+
 # Set the working directory
 WORKDIR /usr/src/app
 
