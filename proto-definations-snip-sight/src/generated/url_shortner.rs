@@ -80,6 +80,8 @@ pub struct CreateShortenUrlPayload {
 pub struct Shorten {
     #[prost(string, tag = "1")]
     pub shorten_url: ::prost::alloc::string::String,
+    #[prost(int64, tag = "2")]
+    pub id: i64,
 }
 /// Generated client implementations.
 pub mod url_shortner_service_client {

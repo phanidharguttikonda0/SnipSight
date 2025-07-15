@@ -63,4 +63,5 @@ message CreateShortenUrlPayload {
 
 message Shorten {
   string shorten_url = 1 ;
+  int64 id = 2 ;
 }
