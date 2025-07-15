@@ -57,6 +57,9 @@ jobs:
           source $HOME/.cargo/env
           sqlx migrate run --database-url postgres://postgres:phani@localhost:5432/authentication
 
+      - name: Install Protobuf Compiler
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
       - name: Run Tests
         working-directory: ./authentication_app
         run: |
