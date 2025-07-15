@@ -67,7 +67,6 @@ dependencies = [
  "axum",
  "chrono",
  "jsonwebtoken",
- "log",
  "serde",
  "sqlx",
  "tokio",
