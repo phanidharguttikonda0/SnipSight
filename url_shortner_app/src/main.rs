@@ -1,15 +1,20 @@
 mod server_service;
+mod services;
+
+use std::sync::Arc;
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::UrlShortnerServiceServer;
-use server_service::UrlShortnerServer;
-
-
-use tonic::{Request, Response, Status};
+use sqlx::PgPool;
+use server_service::UrlShortnerServerServices;
 use tonic::transport::Server;
+
+
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = "127.0.0.1:9091".parse()?;
-    let service = UrlShortnerServer::default();
+    let pool = PgPool::connect("postgres://user:pass@localhost/db").await?;
+    let service = UrlShortnerServerServices::new(Arc::new(pool));
 
     println!("Listening on {}", address);
 

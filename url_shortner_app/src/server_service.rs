@@ -1,23 +1,49 @@
+use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::{UrlShortnerService};
 use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Shorten};
 use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
+use sqlx::{Pool, Postgres};
+use tonic::codegen::http::StatusCode;
+use crate::services::shorten_url_write::store_new_url;
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
 
-#[derive(Debug, Default)]
-pub struct UrlShortnerServer {}
+#[derive(Debug)]
+pub struct UrlShortnerServerServices {
+    db: Arc<Pool<Postgres>>
+}
+
+impl UrlShortnerServerServices {
+    pub fn new(db: Arc<Pool<Postgres>>) -> Self {
+        Self { db }
+    }
+}
 
 #[tonic::async_trait]
-impl UrlShortnerService for UrlShortnerServer{
+impl UrlShortnerService for UrlShortnerServerServices {
     async fn create_shorten_url(&self, request: Request<CreateShortenUrlPayload>) -> Result<Response<Shorten>, Status> {
         let payload = request.into_inner();
 
-        let reply = Shorten {
-            shorten_url: payload.custom_url,
-        };
+        tracing::info!("Received request: {:?}", payload);
+        match store_new_url(payload, &self.db).await {
+            Ok(result) => {
+                tracing::info!("result: {:?}", result);
+                Ok(
+                    Response::new(
+                        Shorten {
+                            id: result.1,
+                            shorten_url: result.0,
+                        }
+                    )
+                )
+            },
+            Err(err) => {
+                tracing::error!("Error while storing new url: {:?}", err);
+                Err(Status::aborted(String::from("Check Whether the url was not same and custom-name to be unique")))
+            }
+        }
 
-        Ok(Response::new(reply))
     }
 
     async fn delete_shorten_url(&self, request: Request<UrlId>) -> Result<Response<SuccessMessage>, Status> {
