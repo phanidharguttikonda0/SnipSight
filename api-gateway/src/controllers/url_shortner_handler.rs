@@ -1,13 +1,14 @@
-use axum::{Extension, Form};
+use axum::{Extension, Form, Json};
 use axum::extract::Path;
 use axum::response::IntoResponse;
-use proto_definitions_snip_sight::generated::url_shortner::CreateShortenUrlPayload;
-use proto_definitions_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
-use serde_json::json;
+use hyper::StatusCode;
+use proto_definations_snip_sight::generated::url_shortner::CreateShortenUrlPayload;
+use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use crate::models::authentication_models::Claims;
+use crate::models::responses::ErrorResponse;
 use crate::models::url_shorten_models::UrlShortenModel;
 
-pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data):Form<UrlShortenModel>) -> impl IntoResponse {
+pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data):Form<UrlShortenModel>) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
 
     // connecting to create_shorten url gRPC server
     let mut client = UrlShortnerServiceClient::connect("http://localhost:9091").await;
@@ -24,10 +25,38 @@ pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data)
             let response = client_channel.create_shorten_url(request).await ;
             tracing::info!("Response from gRPC server: {:?}", response);
             // we are going to handle the response as well
+            match response {
+                Ok(response) => {
+                    tracing::info!("Response from gRPC server: {:?}", response);
+                    Ok(
+                        (
+                            StatusCode::CREATED,
+                            serde_json::to_string(&response.into_inner()).unwrap() // we are passing the shorten url and it's id
+                        )
+                    )
+                },
+                Err(status) => {
+                    tracing::info!("Error in gRPC server response: {}", status);
+                    Err((
+                        StatusCode::CONFLICT, // the data was conflicting with the database
+                       Json( ErrorResponse {
+                            message: "Error in connecting to gRPC server".to_string(),
+                        })
+                    ))
+                }
+            }
         },
         Err(error) => {
             tracing::error!("Error in connecting to gRPC server: {}", error);
             // we are going to return error with status code 500
+            Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(
+                        ErrorResponse {
+                            message: "Error in connecting to gRPC server".to_string(),
+                        }
+                    )
+                ))
         }
     }
 
