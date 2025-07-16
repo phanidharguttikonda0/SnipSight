@@ -1,12 +1,12 @@
 use axum::{Extension, Form, Json};
-use axum::extract::Path;
+use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
 use hyper::StatusCode;
-use proto_definations_snip_sight::generated::url_shortner::CreateShortenUrlPayload;
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, User};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use crate::models::authentication_models::Claims;
 use crate::models::responses::ErrorResponse;
-use crate::models::url_shorten_models::UrlShortenModel;
+use crate::models::url_shorten_models::{PaginationParams, UrlShortenModel};
 
 pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data):Form<UrlShortenModel>) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
 
@@ -62,8 +62,28 @@ pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data)
 
 }
 
-pub async fn get_urls(Extension(claims): Extension<Claims>) -> impl IntoResponse {
+pub async fn get_urls(Query(params): Query<PaginationParams>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
+    tracing::info!("get urls request recieved to the gate_way ") ;
+    let mut client = UrlShortnerServiceClient::connect("http://localhost:9091").await;
 
+    match client {
+        Ok(mut client_channel) => {
+            let request = tonic::Request::new(
+                User {
+                    page_size: params.page_size.unwrap_or(5),
+                    page_number: params.page_number.unwrap_or(1),
+                    user_id: claims.user_id as i64,
+                }
+            );
+
+            let response = client_channel.get_shorten_urls_list(request).await;
+            // we need to handle the response
+        },
+        Err(status) => {
+            tracing::error!("unable to connect to gate_way server: {}", status);
+            // we need to return internal server error
+        }
+    }
 }
 
 // for the path we are going to do the input validation inside before sending the request
