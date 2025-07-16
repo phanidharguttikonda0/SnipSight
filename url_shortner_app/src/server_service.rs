@@ -5,7 +5,7 @@ use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayl
 use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
 use sqlx::{Pool, Postgres};
 use tonic::codegen::http::StatusCode;
-use crate::services::shorten_url_write::store_new_url;
+use crate::services::shorten_url_write::{get_urls, store_new_url};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
 
@@ -55,7 +55,22 @@ impl UrlShortnerService for UrlShortnerServerServices {
     }
 
     async fn get_shorten_urls_list(&self, request: Request<User>) -> Result<Response<UrlsList>, Status> {
-        todo!()
+
+        let user = request.into_inner();
+        tracing::info!("Received request: {:?}", user);
+        let urls = get_urls(user.user_id,user.page_number, user.page_size, &self.db).await ;
+        match urls {
+            Ok(urls) => {
+                Ok(Response::new(
+                   UrlsList {
+                       list: urls
+                   }
+                ))
+            },
+            Err(err) => {
+                Err(Status::internal(format!("{}", err)))
+            }
+        }
     }
 }
 

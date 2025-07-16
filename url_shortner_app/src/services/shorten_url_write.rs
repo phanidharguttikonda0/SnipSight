@@ -1,5 +1,8 @@
-use proto_definations_snip_sight::generated::url_shortner::CreateShortenUrlPayload;
-use sqlx::{Pool, Postgres};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Urls};
+use sqlx::{Error, FromRow, Pool, Postgres, Row};
+use sqlx::postgres::PgRow;
+use tonic::Status;
+use crate::models::UrlModel;
 
 pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>) -> Result<(String, i64), String> {
 
@@ -16,4 +19,36 @@ pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>
             Err(error.to_string())
         }
     }
+}
+
+pub async fn get_urls(user_id: i64,page_number: u32, page_size: u32, db: &Pool<Postgres>) -> Result<Vec<Urls>, String> {
+
+    tracing::info!("get urls was called with the user_id {}", user_id) ;
+
+    let offset = page_number * page_size ;
+    let urls = sqlx::query_as::<_, UrlModel>("select * from website_urls where user_id = $1 OFFSET $2 LIMIT $3")
+    .bind(user_id).bind(offset as i32).bind(page_size as i32).fetch_all(db).await ;
+
+    match urls {
+        Ok(urls) => {
+            tracing::info!("got the urls for the user_id {}",user_id) ;
+            let mut urlss = vec![] ;
+            for url in urls.iter() {
+                urlss.push(Urls {
+                    id: url.id,
+                    original_url: url.short_url.to_string(),
+                    shorten_url: url.short_url.to_string(),
+                    view_count: url.view_count,
+                    created_at: url.created_at.to_string()
+                })
+            }
+
+            Ok(urlss)
+        },
+        Err(error) => {
+            tracing::error!("Error Occured while getting urls {}",error) ;
+            Err(String::from("Internal Server Error"))
+        }
+    }
+
 }

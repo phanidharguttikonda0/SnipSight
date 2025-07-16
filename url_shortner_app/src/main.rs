@@ -1,5 +1,6 @@
 mod server_service;
 mod services;
+mod models;
 
 use std::sync::Arc;
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::UrlShortnerServiceServer;
