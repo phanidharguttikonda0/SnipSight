@@ -30,7 +30,7 @@ message Urls {
   int64  id = 1; // id of the row
   string original_url = 2;
   string shorten_url = 3;
-  string view_count = 4;
+  int64 view_count = 4;
   string created_at = 5; // here we need to change the type to timestamp
 }
 

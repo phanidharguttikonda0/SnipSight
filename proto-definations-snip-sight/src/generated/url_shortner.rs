@@ -26,8 +26,8 @@ pub struct Urls {
     pub original_url: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub shorten_url: ::prost::alloc::string::String,
-    #[prost(string, tag = "4")]
-    pub view_count: ::prost::alloc::string::String,
+    #[prost(int64, tag = "4")]
+    pub view_count: i64,
     /// here we need to change the type to timestamp
     #[prost(string, tag = "5")]
     pub created_at: ::prost::alloc::string::String,
