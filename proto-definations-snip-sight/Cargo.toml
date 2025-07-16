@@ -9,8 +9,9 @@ repository = ""
 
 [dependencies]
 tonic = "0.13.1" # is a gRPC implementation for rust
-prost = "0.13.1" # is a protoBuffer implementation for rust
+prost = { version = "0.13.1", features = ["prost-derive", "derive"] } # is a protoBuffer implementation for rust
 prost-types = "0.13.1" # making sure using the same version
+serde = { version = "1.0.219", features = ["derive"] }
 
 [build-dependencies]
 tonic-build = "0.13.1"

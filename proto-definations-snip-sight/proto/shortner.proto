@@ -31,7 +31,7 @@ message Urls {
   string original_url = 2;
   string shorten_url = 3;
   string view_count = 4;
-  google.protobuf.Timestamp created_at = 5; // here we need to change the type to timestamp
+  string created_at = 5; // here we need to change the type to timestamp
 }
 
 message CustomName {
