@@ -5,7 +5,7 @@ edition = "2024"
 build = "build.rs"
 description = "Shared gRPC definations for SnipSight services"
 license = "MIT"
-repository = ""
+repository = "https://github.com/phanidharguttikonda0/SnipSight"
 
 [dependencies]
 tonic = "0.13.1" # is a gRPC implementation for rust
