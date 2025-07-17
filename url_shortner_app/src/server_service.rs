@@ -23,6 +23,7 @@ impl UrlShortnerServerServices {
 #[tonic::async_trait]
 impl UrlShortnerService for UrlShortnerServerServices {
     async fn create_shorten_url(&self, request: Request<CreateShortenUrlPayload>) -> Result<Response<Shorten>, Status> {
+        tracing::info!("Creating shorten url was going to execute") ;
         let payload = request.into_inner();
 
         tracing::info!("Received request: {:?}", payload);
@@ -55,10 +56,10 @@ impl UrlShortnerService for UrlShortnerServerServices {
     }
 
     async fn get_shorten_urls_list(&self, request: Request<User>) -> Result<Response<UrlsList>, Status> {
-
+        tracing::info!("Getting shorten urls list was going to execute") ;
         let user = request.into_inner();
         tracing::info!("Received request: {:?}", user);
-        let urls = get_urls(user.user_id,user.page_number, user.page_size, &self.db).await ;
+        let urls = get_urls(user.user_id as i32,user.page_number, user.page_size, &self.db).await ;
         match urls {
             Ok(urls) => {
                 Ok(Response::new(

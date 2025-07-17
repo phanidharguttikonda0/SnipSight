@@ -13,8 +13,11 @@ use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing::info!("Starting gRPC server");
+    tracing_subscriber::fmt::init();
+    // when we are running as a docker container on the cloud we need to update it to "[::1]:9091".parse()?
     let address = "127.0.0.1:9091".parse()?;
-    let pool = PgPool::connect("postgres://user:pass@localhost/db").await?;
+    let pool = PgPool::connect("postgres://postgres:phani@localhost:5432/url_shortner_service").await?;
     let service = UrlShortnerServerServices::new(Arc::new(pool));
 
     println!("Listening on {}", address);

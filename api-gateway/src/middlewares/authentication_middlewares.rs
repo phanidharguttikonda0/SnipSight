@@ -20,11 +20,19 @@ pub async fn authorization_check(State(state): State<AppState>, mut req: Request
     let secret = String::from(jwt_secret.as_str());
     match req.headers().get("Authorization") {
         Some(header) => {
-            let result = check_authorization_header(secret, String::from(header.to_str().unwrap())).await ;
+            let header_string ;
+            if header.to_str().unwrap().starts_with("Bearer ") {
+                header_string = header.to_str().unwrap().replace("Bearer ", "");
+            }else {
+                tracing::info!("Authorization header was not in Bearer format");
+                return Err((StatusCode::UNAUTHORIZED, Json(ErrorResponse{message: String::from("Authorization header was not in Bearer format")})))
+            }
+
+            let result = check_authorization_header(secret, header_string).await ;
             match result {
                 Ok(claims) => {
                     tracing::info!("claims: {:?}", claims);
-                    req.extensions_mut().insert(claims);
+                    req.extensions_mut().insert(Claims {user_id: claims.0, username: claims.1});
                     Ok(next.run(req).await)
                 },
                 Err(error) => {

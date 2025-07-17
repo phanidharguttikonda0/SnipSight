@@ -9,7 +9,7 @@ pub struct UrlShortenModel {
     pub custom_url: Option<String>, // it can be None, if the user was not a premium member
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct PaginationParams {
     pub page_size: Option<u32>,
     pub page_number: Option<u32>,

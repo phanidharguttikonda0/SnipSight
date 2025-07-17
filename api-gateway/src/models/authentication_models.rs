@@ -5,8 +5,7 @@ use crate::middlewares::authentication_middlewares::{validate_digits_only, valid
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Claims{
     pub user_id: i32,
-    pub username: String,
-    pub exp: usize,
+    pub username: String
 }
 
 #[derive(Debug, Deserialize, Validate)]

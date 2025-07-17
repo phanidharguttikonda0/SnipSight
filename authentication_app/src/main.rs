@@ -32,10 +32,11 @@ async fn get_rds_url() -> String {
     // here we need to get the urls from the aws secret manager or what ever we use
     tracing::info!("going to get rds url");
     String::from("postgres://postgres:Phani9090Kl@snipshare.cbigqkgesirb.ap-south-1.rds.amazonaws.com:5432/authentication_app")
+    // String::from("postgres://postgres:phani@localhost:5432/authentication_app") -- for local testing
 }
 
 async fn get_jwt_key() -> String {
-    String::from("") // jwt secrets key
+    String::from("secret") // jwt secrets key
 }
 
 async fn create_connection(connection_url: String) -> Option<Pool<Postgres>> {

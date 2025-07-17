@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-proto-definations-snip-sight = "0.1.1"
+proto-definations-snip-sight = "0.1.2"
 tonic = "0.13.1" # is a gRPC implementation for rust
 tokio = { version = "1.46.1", features = ["full"] }
 sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio-rustls", "migrate", "derive", "chrono"] }
 tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 chrono = {version = "0.4.41", features = ["serde"]} # making sure using the same version

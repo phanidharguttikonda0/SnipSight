@@ -29,7 +29,7 @@ async fn main() {
     tracing::info!("Going to start the server") ;
 
     // in ec2 instance we will map port 80 with 8080 via running as the container
-    let tcp_listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap() ;
+    let tcp_listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await.unwrap() ;
 
     tracing::info!("Server is going listening on port {}", tcp_listener.local_addr().unwrap().port() );
     axum::serve(tcp_listener, app).await.unwrap()

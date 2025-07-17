@@ -4,20 +4,28 @@ use axum::response::IntoResponse;
 use hyper::StatusCode;
 use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, User};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
+use tonic::transport::{Channel, Error};
 use crate::models::authentication_models::Claims;
 use crate::models::responses::ErrorResponse;
 use crate::models::url_shorten_models::{PaginationParams, UrlShortenModel};
 
+async fn create_grpc_connection() -> Result<UrlShortnerServiceClient<Channel>, Error> {
+    // we need to change the localhost to the container name , while deploying in the cloud, may be the container name instead of localhost
+    UrlShortnerServiceClient::connect("http://localhost:9091").await
+}
+
 pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data):Form<UrlShortenModel>) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
 
     // connecting to create_shorten url gRPC server
-    let mut client = UrlShortnerServiceClient::connect("http://localhost:9091").await;
+    let mut client = create_grpc_connection().await;
+    // generation of custom-url
     let name = data.custom_url.unwrap_or_else(|| String::from("we need to generate a custom url"));
+    tracing::info!("create shorten url request recieved to the gate_way ") ;
     match client {
         Ok(mut client_channel) => {
             // Creating a Request
             let request = tonic::Request::new( CreateShortenUrlPayload{
-                user_id: claims.user_id as i64,
+                user_id: claims.user_id,
                 custom_url: name,
                 original_url: data.original_url,
             }) ;
@@ -59,29 +67,59 @@ pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data)
                 ))
         }
     }
-
 }
 
 pub async fn get_urls(Query(params): Query<PaginationParams>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
     tracing::info!("get urls request recieved to the gate_way ") ;
-    let mut client = UrlShortnerServiceClient::connect("http://localhost:9091").await;
-
+    let mut client =  create_grpc_connection().await;
+    tracing::info!("Params Recieved was {:?}", params) ;
+    tracing::info!("page_number {} and page _size {}", params.page_number.unwrap_or(1), params.page_size.unwrap_or(5)) ;
     match client {
         Ok(mut client_channel) => {
             let request = tonic::Request::new(
                 User {
                     page_size: params.page_size.unwrap_or(5),
                     page_number: params.page_number.unwrap_or(1),
-                    user_id: claims.user_id as i64,
+                    user_id: claims.user_id,
                 }
             );
 
             let response = client_channel.get_shorten_urls_list(request).await;
             // we need to handle the response
+            match response {
+                Ok(response) => {
+                    tracing::info!("Response from gRPC server: {:?}", response);
+                    Ok(
+                        (
+                            StatusCode::OK,
+                            serde_json::to_string(&response.into_inner()).unwrap()
+                        )
+                    )
+                },
+                Err(status) => {
+                    tracing::error!("Error in gRPC server response: {}", status);
+                    Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(
+                            ErrorResponse {
+                                message: "Error in getting response from gRPC".to_string(),
+                            }
+                        )
+                    ))
+                }
+            }
         },
         Err(status) => {
-            tracing::error!("unable to connect to gate_way server: {}", status);
+            tracing::error!("unable to connect to gRPc : {}", status);
             // we need to return internal server error
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(
+                    ErrorResponse {
+                        message: "Error in getting response from gRPC".to_string(),
+                    }
+                )
+            ))
         }
     }
 }
