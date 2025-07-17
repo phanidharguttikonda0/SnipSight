@@ -2,8 +2,8 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct User {
-    #[prost(int64, tag = "1")]
-    pub user_id: i64,
+    #[prost(int32, tag = "1")]
+    pub user_id: i32,
     #[prost(uint32, tag = "2")]
     pub page_number: u32,
     #[prost(uint32, tag = "3")]
@@ -20,14 +20,14 @@ pub struct UrlsList {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Urls {
     /// id of the row
-    #[prost(int64, tag = "1")]
-    pub id: i64,
+    #[prost(int32, tag = "1")]
+    pub id: i32,
     #[prost(string, tag = "2")]
     pub original_url: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub shorten_url: ::prost::alloc::string::String,
-    #[prost(int64, tag = "4")]
-    pub view_count: i64,
+    #[prost(int32, tag = "4")]
+    pub view_count: i32,
     /// here we need to change the type to timestamp
     #[prost(string, tag = "5")]
     pub created_at: ::prost::alloc::string::String,
@@ -35,10 +35,10 @@ pub struct Urls {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CustomName {
-    #[prost(int64, tag = "1")]
-    pub id: i64,
-    #[prost(int64, tag = "2")]
-    pub user_id: i64,
+    #[prost(int32, tag = "1")]
+    pub id: i32,
+    #[prost(int32, tag = "2")]
+    pub user_id: i32,
     /// the new custom name, before that we need to check whether the user was premium member or having credits at least
     #[prost(string, tag = "3")]
     pub custom_name: ::prost::alloc::string::String,
@@ -56,11 +56,11 @@ pub struct UpdatedCustomName {
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct UrlId {
     /// id of the url
-    #[prost(int64, tag = "1")]
-    pub id: i64,
+    #[prost(int32, tag = "1")]
+    pub id: i32,
     /// it helps to check whether the id belongs to the specific user-id or not
-    #[prost(int64, tag = "2")]
-    pub user_id: i64,
+    #[prost(int32, tag = "2")]
+    pub user_id: i32,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -81,16 +81,16 @@ pub struct CreateShortenUrlPayload {
     /// it may null as well
     #[prost(string, tag = "2")]
     pub custom_url: ::prost::alloc::string::String,
-    #[prost(int64, tag = "3")]
-    pub user_id: i64,
+    #[prost(int32, tag = "3")]
+    pub user_id: i32,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Shorten {
     #[prost(string, tag = "1")]
     pub shorten_url: ::prost::alloc::string::String,
-    #[prost(int64, tag = "2")]
-    pub id: i64,
+    #[prost(int32, tag = "2")]
+    pub id: i32,
 }
 /// Generated client implementations.
 pub mod url_shortner_service_client {
