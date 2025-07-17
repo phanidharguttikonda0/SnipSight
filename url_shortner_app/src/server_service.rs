@@ -5,7 +5,7 @@ use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayl
 use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
 use sqlx::{Pool, Postgres};
 use tonic::codegen::http::StatusCode;
-use crate::services::shorten_url_write::{get_urls, store_new_url};
+use crate::services::shorten_url_write::{delete_url, get_urls, store_new_url, update_shorten_url_name};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
 
@@ -48,11 +48,49 @@ impl UrlShortnerService for UrlShortnerServerServices {
     }
 
     async fn delete_shorten_url(&self, request: Request<UrlId>) -> Result<Response<SuccessMessage>, Status> {
-        todo!()
+        tracing::info!("Deleting shorten url was going to execute") ;
+        let details = request.into_inner() ;
+        tracing::info!("Received request: {:?}", details);
+        let result = delete_url(details.id, &self.db).await ;
+
+        match result {
+            Ok(_) => {
+                tracing::info!("Deleted successfully");
+                Ok(Response::new(
+                    SuccessMessage {
+                        cause: "None".to_string(),
+                        operation: true
+                    }
+                ))
+            },
+            Err(err) => {
+                tracing::error!("Error while deleting url: {:?}", err);
+                Err(Status::aborted(err))
+            }
+        }
     }
 
     async fn update_shorten_url(&self, request: Request<CustomName>) -> Result<Response<UpdatedCustomName>, Status> {
-        todo!()
+        tracing::info!("Updating shorten url was going to execute") ;
+        let details = request.into_inner() ;
+        tracing::info!("Received request: {:?}", details);
+        let result = update_shorten_url_name(details.id,&details.custom_name, &self.db).await ;
+
+        match result {
+            Ok(_) => {
+                tracing::info!("Updated Successfully successfully");
+                Ok(Response::new(
+                    UpdatedCustomName {
+                        cause: "None".to_string(),
+                        new_name: details.custom_name
+                    }
+                ))
+            },
+            Err(err) => {
+                tracing::error!("Error while updating custom name for url: {:?}", err);
+                Err(Status::aborted(err))
+            }
+        }
     }
 
     async fn get_shorten_urls_list(&self, request: Request<User>) -> Result<Response<UrlsList>, Status> {

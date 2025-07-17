@@ -47,8 +47,75 @@ pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<P
         },
         Err(error) => {
             tracing::error!("Error Occured while getting urls {}",error) ;
-            Err(String::from("Internal Server Error"))
+            match error {
+                Error::RowNotFound => {
+                    Err(String::from("No Row found"))
+                },
+                _ => {
+                    Err(String::from("Internal Server Error"))
+                }
+            }
+
         }
     }
 
+}
+
+pub async fn update_shorten_url_name(id: i32, name: &str, db: &Pool<Postgres>) -> Result<bool, String> {
+
+    tracing::info!("update shorten url name was called with the id {} and name {}", id, name) ;
+
+    let result = sqlx::query("update website_urls SET shorten_url=$1 where user_id=$2")
+        .bind(name).bind(id).execute(db).await ;
+
+    match result {
+        Ok(result) => {
+            tracing::info!("update happened") ;
+            if result.rows_affected() > 0 {
+                Ok(true)
+            }else {
+                Err(String::from("Not Updated, the Id doesn't exists"))
+            }
+        },
+        Err(err) => {
+            tracing::error!("error occured while updating the shorten_url was {}", err) ;
+            match err {
+                Error::Io(err) => {
+                    Err(String::from("error Occured while Communicating with the database") )
+                },
+                _ => {
+                    Err(String::from("An unexpected database error occurred"))
+                }
+            }
+        }
+    }
+}
+
+pub async fn delete_url(id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
+
+    tracing::info!("delete url was called with the id {}", id) ;
+    let result = sqlx::query("DELETE FROM website_urls WHERE id=$1")
+        .bind(id).execute(db).await ;
+
+    match result {
+        Ok(result) => {
+            tracing::info!("deletion happened") ;
+            if result.rows_affected() > 0 {
+                Ok(true)
+            }else {
+                Err(String::from("Not deleted, the Id doesn't exists"))
+            }
+        },
+        Err(error) => {
+            tracing::error!("error while deleting the url was {}", error) ;
+            match error {
+                Error::Io(err) => {
+                    Err(String::from("error Occured while Communicating with the database") )
+                },
+                _ => {
+                    Err(String::from("An unexpected database error occurred"))
+                }
+            }
+        }
+    }
 }

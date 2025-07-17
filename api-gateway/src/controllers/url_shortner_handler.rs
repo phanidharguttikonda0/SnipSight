@@ -2,7 +2,7 @@ use axum::{Extension, Form, Json};
 use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
 use hyper::StatusCode;
-use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, User};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use tonic::transport::{Channel, Error};
 use crate::models::authentication_models::Claims;
@@ -125,10 +125,109 @@ pub async fn get_urls(Query(params): Query<PaginationParams>,Extension(claims): 
 }
 
 // for the path we are going to do the input validation inside before sending the request
-pub async fn delete_url(Path(id): Path<i64>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
-    "checks will be done in the url_shortner service"
+pub async fn delete_url(Path(id): Path<i32>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
+   tracing::info!("delete url request recieved to the gate_way ") ;
+    let client =  create_grpc_connection().await;
+    match client {
+        Ok(mut client) => {
+           let request = tonic::Request::new(
+               UrlId {
+                   user_id: claims.user_id,
+                   id
+               }
+           ) ;
+
+           let response = client.delete_shorten_url(request).await ;
+
+            match response {
+                Ok(response) => {
+                    tracing::info!("Response from gRPC server: {:?}", response);
+                    Ok(
+                        (
+                            StatusCode::NO_CONTENT,
+                            serde_json::to_string(&response.into_inner()).unwrap()
+                        )
+                    )
+                },
+                Err(status) => {
+                    tracing::error!("Error in gRPC server response: {}", status);
+                    Err((
+                        StatusCode::BAD_REQUEST,
+                        Json(
+                            ErrorResponse {
+                                message: status.message().to_string(),
+                            }
+                        )
+                    ))
+                }
+            }
+        },
+        Err(err) => {
+            tracing::error!("unable to connect to gRPC : {}", err);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(
+                    ErrorResponse {
+                        message: "Error in getting response from gRPC".to_string(),
+                    }
+                )
+            ))
+        }
+    }
 }
 
-pub async fn update_url(Path((id, new_name)): Path<(i64, String)>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
-    "Json(format!())"
+pub async fn update_url(Path((id, new_name)): Path<(i32, String)>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
+
+    tracing::info!("update url request recieved to the gate_way ") ;
+    let client = create_grpc_connection().await;
+
+    match client {
+        Ok(mut client) => {
+
+            let request = tonic::Request::new(
+                CustomName {
+                    user_id: claims.user_id,
+                    custom_name: new_name,
+                    id
+                }
+            ) ;
+
+            let response = client.update_shorten_url(request).await ;
+            match response {
+                Ok(response) => {
+                    tracing::info!("Response from gRPC server: {:?}", response);
+                    Ok(
+                        (
+                            StatusCode::OK,
+                            serde_json::to_string(&response.into_inner()).unwrap()
+                        )
+                    )
+                }
+                Err(error) =>{
+                    tracing::error!("Error in gRPC server response: {}", error);
+                    Err((
+                        StatusCode::BAD_REQUEST,
+                        Json(
+                            ErrorResponse {
+                                message: error.message().to_string(),
+                            }
+                        )
+                    ))
+                }
+            }
+
+
+        },
+        Err(err) => {
+            tracing::error!("unable to connect to gRPC : {}", err);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(
+                    ErrorResponse {
+                        message: "Error in Connecting to gRPC".to_string(),
+                    }
+                )
+            ))
+        }
+    }
 }
