@@ -7,7 +7,7 @@ use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_
 use tonic::transport::{Channel, Error};
 use crate::models::authentication_models::Claims;
 use crate::models::responses::ErrorResponse;
-use crate::models::url_shorten_models::{PaginationParams, UrlShortenModel};
+use crate::models::url_shorten_models::{KeyInsights, PaginationParams, UrlShortenModel};
 
 async fn create_grpc_connection() -> Result<UrlShortnerServiceClient<Channel>, Error> {
     // we need to change the localhost to the container name , while deploying in the cloud, may be the container name instead of localhost
@@ -230,4 +230,31 @@ pub async fn update_url(Path((id, new_name)): Path<(i32, String)>,Extension(clai
             ))
         }
     }
+}
+
+
+pub async fn get_key_insights(Path(id):Path<i32>, Query(params):Query<PaginationParams>, Extension(claims):Extension<Claims>) -> Result<impl IntoResponse,impl IntoResponse> {
+
+    if params.page_number.is_some() || params.page_size.is_some() {
+        return Err(
+            (
+                StatusCode::BAD_REQUEST,
+                Json(
+                    ErrorResponse {
+                        message: "Page number and page size are not allowed".to_string(),
+                    }
+                )
+                )
+        )
+    }
+    Ok(
+        (
+            StatusCode::OK,
+            Json(
+                    KeyInsights {
+                        insights: vec![]
+                    }
+            )
+        )
+    )
 }

@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: API Gateway
+  version: 1.0.0
+  description: Swagger documentation for the API Gateway routes with controllers assigned.
+servers:
+  - url: http://localhost:8080
+paths:
+  /authentication/sign-in:
+    post:
+      summary: User sign-in
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Response from authentication service (unknown schema)
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /authentication/sign-up:
+    post:
+      summary: User registration
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Response from authentication service (unknown schema)
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /url-shortner/create-url:
+    post:
+      summary: Create a shortened URL
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UrlShortenModel'
+      responses:
+        '201':
+          description: Short URL created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  short_url:
+                    type: string
+                  id:
+                    type: integer
+        '409':
+          description: Conflict (e.g., custom URL already exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /url-shortner/get-urls:
+    get:
+      summary: Get list of shortened URLs
+      parameters:
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+        - in: query
+          name: page_number
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of URLs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: URL object (fields depend on gRPC response)
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /url-shortner/update-url/{id}/{new_name}:
+    get:
+      summary: Update a shortened URL's custom name
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: new_name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: URL updated
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Updated URL object (fields depend on gRPC response)
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /url-shortner/delete-url/{id}:
+    get:
+      summary: Delete a shortened URL
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: URL deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /url-shortner/key-insights/{id}:
+    get:
+      summary: Get key insights for a shortened URL
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Key insights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyInsights'
+        '400':
+          description: Bad request (e.g., page params not allowed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Login:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    Register:
+      type: object
+      required:
+        - username
+        - password
+        - mail_id
+        - mobile
+        - country_id
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        mail_id:
+          type: string
+          format: email
+        mobile:
+          type: string
+        country_id:
+          type: integer
+    UrlShortenModel:
+      type: object
+      required:
+        - original_url
+      properties:
+        original_url:
+          type: string
+          format: uri
+        custom_url:
+          type: string
+          nullable: true
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    KeyInsights:
+      type: object
+      properties:
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Insight'
+    Insight:
+      type: object
+      properties:
+        ip_address:
+          type: string
+        location:
+          type: string
+        timestamp:
+          type: string
+        refferal_source:
+          type: string
+        others:
+          $ref: '#/components/schemas/Others'
+    Others:
+      type: object
+      properties:
+        device_type:
+          type: string
+        browser:
+          type: string
+        os:
+          type: string 

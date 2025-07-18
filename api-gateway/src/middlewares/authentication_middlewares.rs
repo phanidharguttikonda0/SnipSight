@@ -20,6 +20,7 @@ pub async fn authorization_check(State(state): State<AppState>, mut req: Request
     let secret = String::from(jwt_secret.as_str());
     match req.headers().get("Authorization") {
         Some(header) => {
+            tracing::info!("Authorization header was provided {}", header.to_str().unwrap());
             let header_string ;
             if header.to_str().unwrap().starts_with("Bearer ") {
                 header_string = header.to_str().unwrap().replace("Bearer ", "");
@@ -56,6 +57,7 @@ pub async fn check_authorization_header(jwt_secret: String, header: String) -> R
         &DecodingKey::from_secret(jwt_secret.as_ref()),
         &Validation::default(),
     );
+    tracing::info!("header was {:?}", header);
     match result {
         Ok(token_data) => {
             tracing::info!("Authorization header decoded successfully");

@@ -47,6 +47,7 @@ dependencies = [
  "serde_urlencoded",
  "tokio",
  "tonic",
+ "tower-http",
  "tracing",
  "tracing-subscriber",
  "validator",

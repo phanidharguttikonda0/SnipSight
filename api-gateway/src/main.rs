@@ -5,7 +5,9 @@ mod services;
 mod models;
 
 use axum::{middleware, Router};
+use axum::http::Method;
 use axum::routing::get;
+use tower_http::cors::{Any, CorsLayer};
 use middlewares::authentication_middlewares;
 use crate::middlewares::authentication_middlewares::authorization_check;
 use crate::routes::authentication_routes::authentication_routes;
@@ -23,7 +25,13 @@ async fn main() {
 
     tracing_subscriber::fmt::init();
 
-    let app = routes().await ;
+    // Build the CORS layer
+    let cors = CorsLayer::new()
+        .allow_origin(Any) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers(Any);
+
+    let app = routes(cors).await ;
     tracing::info!("built the Router") ;
 
     tracing::info!("Going to start the server") ;
@@ -37,7 +45,7 @@ async fn main() {
 
 
 
-async fn routes() -> Router {
+async fn routes(cors_layer: CorsLayer) -> Router {
     let secret = get_jwt_secret().await;
     Router::new()
         .route("/{shorten_url}", get(|| async {
@@ -48,6 +56,7 @@ async fn routes() -> Router {
         .nest("/payment-routes", payment_routes())
         .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
         .nest("/authentication", authentication_routes())
+        .layer(cors_layer)
 }
 
 async fn get_jwt_secret() -> String {
