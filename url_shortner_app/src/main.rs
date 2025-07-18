@@ -79,7 +79,7 @@ async fn get_database_connection_urls() -> (String, String) {
     //     dynamo_url = String::from("No value found");
     // }
 
-    (format!("postgres_url{}", "url_shortner_app"), String::from("dynamo_url"))
+    (format!("{}{}", postgres_url,"url_shortner_app"), String::from("dynamo_url"))
 }
 
 async fn create_database_connections() -> Pool<Postgres>{
