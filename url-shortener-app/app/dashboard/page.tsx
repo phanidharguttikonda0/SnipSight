@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { LinkIcon, Copy, Edit, Trash2, BarChart3, Plus, ChevronLeft, ChevronRight } from "lucide-react"
-
+import {API_BASE_URL} from "@/lib/api";
 interface UrlItem {
   id: number
   original_url: string
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => copyToClipboard(url.shorten_url || `error occured`)}
+                                onClick={() => copyToClipboard(`${API_BASE_URL}${url.shorten_url}` || `error occured`)}
                               >
                                 <Copy className="w-4 h-4" />
                               </Button>

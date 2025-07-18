@@ -1,7 +1,7 @@
 import axios from "axios"
 import type { AxiosRequestConfig, AxiosResponse } from "axios"
 
-const API_BASE_URL = "http://localhost:8080"
+export const API_BASE_URL = "http://ec2-15-206-147-138.ap-south-1.compute.amazonaws.com"
 
 const api = axios.create({
   baseURL: API_BASE_URL,
