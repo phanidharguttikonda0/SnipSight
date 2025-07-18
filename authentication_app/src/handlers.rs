@@ -42,6 +42,7 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
                         let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
                         let mut headers = HeaderMap::new() ;
                         headers.insert("Authorization", HeaderValue::from_str(&header).unwrap()) ;
+                        headers.insert("Access-Control-Expose-Headers" , HeaderValue::from_str("authorization").unwrap()) ;
                         Ok((
                             StatusCode::OK,
                             headers
@@ -115,6 +116,7 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
            tracing::info!("New User Created Successfully");
            let mut headers = HeaderMap::new();
            headers.insert("Authorization", HeaderValue::from_str(&header).unwrap()) ;
+           headers.insert("Access-Control-Expose-Headers" , HeaderValue::from_str("authorization").unwrap()) ;
            Ok((
                StatusCode::CREATED,
                headers
