@@ -60,5 +60,6 @@ async fn routes(cors_layer: CorsLayer) -> Router {
 }
 
 async fn get_jwt_secret() -> String {
+    // needs to use the ssm to get the secret key
     String::from("secret")
 }
