@@ -53,15 +53,15 @@ async fn get_database_connection_urls() -> (String, String) {
         .send()
         .await.unwrap();
 
-    let result2 =  client
-        .get_parameter()
-        .name(param_name_dynamodb)
-        .with_decryption(true)
-        .send()
-        .await.unwrap();
+    // let result2 =  client
+    //     .get_parameter()
+    //     .name(param_name_dynamodb)
+    //     .with_decryption(true)
+    //     .send()
+    //     .await.unwrap();
 
     let mut postgres_url = String::from("Postgres-SQL") ;
-    let mut dynamo_url = String::from("Dynamo-DB") ;
+    // let mut dynamo_url = String::from("Dynamo-DB") ;
 
     if let Some(value) = result1.parameter.and_then(|p| p.value) {
         tracing::info!("Found URL for postgres from SSM Parameter Store {}", value);
@@ -71,15 +71,15 @@ async fn get_database_connection_urls() -> (String, String) {
         postgres_url = String::from("No value found");
     }
 
-    if let Some(value) = result2.parameter.and_then(|p| p.value) {
-        tracing::info!("Found URL for dynamo db from SSM Parameter Store {}", value);
-        dynamo_url = value;
-    }else {
-        tracing::error!("No URL found for dynamo from SSM Parameter Store");
-        dynamo_url = String::from("No value found");
-    }
+    // if let Some(value) = result2.parameter.and_then(|p| p.value) {
+    //     tracing::info!("Found URL for dynamo db from SSM Parameter Store {}", value);
+    //     dynamo_url = value;
+    // }else {
+    //     tracing::error!("No URL found for dynamo from SSM Parameter Store");
+    //     dynamo_url = String::from("No value found");
+    // }
 
-    (format!("postgres_url{}", "url_shortner_app"), dynamo_url)
+    (format!("postgres_url{}", "url_shortner_app"), String::from("dynamo_url"))
 }
 
 async fn create_database_connections() -> Pool<Postgres>{
