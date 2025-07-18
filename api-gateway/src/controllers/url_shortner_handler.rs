@@ -10,8 +10,7 @@ use crate::models::responses::ErrorResponse;
 use crate::models::url_shorten_models::{KeyInsights, PaginationParams, UrlShortenModel};
 
 async fn create_grpc_connection() -> Result<UrlShortnerServiceClient<Channel>, Error> {
-    // we need to change the localhost to the container name , while deploying in the cloud, may be the container name instead of localhost
-    UrlShortnerServiceClient::connect("http://localhost:9091").await
+    UrlShortnerServiceClient::connect("http://url-shortner-container:9091").await
 }
 
 pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data):Form<UrlShortenModel>) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
