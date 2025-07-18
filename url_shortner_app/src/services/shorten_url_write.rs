@@ -61,12 +61,12 @@ pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<P
 
 }
 
-pub async fn update_shorten_url_name(id: i32, name: &str, db: &Pool<Postgres>) -> Result<bool, String> {
+pub async fn update_shorten_url_name(id: i32, name: &str, user_id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
 
     tracing::info!("update shorten url name was called with the id {} and name {}", id, name) ;
 
-    let result = sqlx::query("update website_urls SET shorten_url=$1 where user_id=$2")
-        .bind(name).bind(id).execute(db).await ;
+    let result = sqlx::query("update website_urls SET shorten_url=$1 where id=$2 AND user_id=$3")
+        .bind(name).bind(id).bind(user_id).execute(db).await ;
 
     match result {
         Ok(result) => {
@@ -91,11 +91,11 @@ pub async fn update_shorten_url_name(id: i32, name: &str, db: &Pool<Postgres>) -
     }
 }
 
-pub async fn delete_url(id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
+pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
 
     tracing::info!("delete url was called with the id {}", id) ;
-    let result = sqlx::query("DELETE FROM website_urls WHERE id=$1")
-        .bind(id).execute(db).await ;
+    let result = sqlx::query("DELETE FROM website_urls WHERE id=$1 AND user_id=$2")
+        .bind(id).bind(user_id).execute(db).await ;
 
     match result {
         Ok(result) => {

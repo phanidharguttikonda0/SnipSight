@@ -51,7 +51,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
         tracing::info!("Deleting shorten url was going to execute") ;
         let details = request.into_inner() ;
         tracing::info!("Received request: {:?}", details);
-        let result = delete_url(details.id, &self.db).await ;
+        let result = delete_url(details.id, details.user_id,&self.db).await ;
 
         match result {
             Ok(_) => {
@@ -74,7 +74,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
         tracing::info!("Updating shorten url was going to execute") ;
         let details = request.into_inner() ;
         tracing::info!("Received request: {:?}", details);
-        let result = update_shorten_url_name(details.id,&details.custom_name, &self.db).await ;
+        let result = update_shorten_url_name(details.id,&details.custom_name,details.user_id, &self.db).await ;
 
         match result {
             Ok(_) => {
