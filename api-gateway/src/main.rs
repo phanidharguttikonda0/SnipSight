@@ -47,14 +47,21 @@ async fn main() {
 
 async fn routes(cors_layer: CorsLayer) -> Router {
     let secret = get_jwt_secret().await;
-    Router::new()
+    let protected_routes = Router::new()
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())
+        .layer(middleware::from_fn_with_state(AppState { secret_key: secret }, authorization_check));
+
+    let public_routes = Router::new()
         .nest("/authentication", authentication_routes())
-        .layer(cors_layer)
-        .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
-        .route("/{shorten_url}", get(redirect_url))
+        .route("/{shorten_url}", get(redirect_url));
+
+    Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
+        .layer(cors_layer)  // ✅ CORS globally
+
 }
 
 async fn get_jwt_secret() -> String {
