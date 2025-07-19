@@ -42,6 +42,7 @@ export default function SignInPage() {
       if (!authHeader) {
         throw new Error("No Authorization header received from server");
       }
+      localStorage.setItem("authHeader", authHeader);
       // Create a minimal user object for login
       let userData = undefined;
       if (response.data && typeof response.data === 'object' && 'user' in response.data) {
