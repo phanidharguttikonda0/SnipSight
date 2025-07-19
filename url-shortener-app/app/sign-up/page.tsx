@@ -16,12 +16,12 @@ import { Navbar } from "@/components/navbar"
 import { Eye, EyeOff } from "lucide-react"
 
 const countries: { id: number; name: string }[] = [
-  { id: 7, name: "United States" },
-  { id: 2, name: "United Kingdom" },
-  { id: 3, name: "Canada" },
-  { id: 4, name: "Australia" },
-  { id: 5, name: "Germany" },
-  { id: 6, name: "France" },
+  { id: 2, name: "United States" },
+  { id: 3, name: "United Kingdom" },
+  { id: 4, name: "Canada" },
+  { id: 5, name: "Australia" },
+  { id: 6, name: "Germany" },
+  { id: 7, name: "France" },
   { id: 1, name: "India" },
   { id: 8, name: "Japan" },
 ]
