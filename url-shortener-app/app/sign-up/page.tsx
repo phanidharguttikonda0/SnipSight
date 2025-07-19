@@ -38,7 +38,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
   const { toast } = useToast()
-
+  console.log("country_id selected ", formData.country_id)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)

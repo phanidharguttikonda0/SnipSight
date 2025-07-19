@@ -274,7 +274,7 @@ export default function DashboardPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => copyToClipboard(`${API_BASE_URL}${url.shorten_url}` || `error occured`)}
+                                onClick={() => copyToClipboard(`${API_BASE_URL}/${url.shorten_url}` || `error occured`)}
                               >
                                 <Copy className="w-4 h-4" />
                               </Button>
