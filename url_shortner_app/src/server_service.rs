@@ -1,11 +1,11 @@
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::{UrlShortnerService};
-use proto_definations_snip_sight::generated::url_shortner::{Count, CreateShortenUrlPayload, Shorten};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Shorten, Url};
 use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
 use sqlx::{Pool, Postgres};
 use tonic::codegen::http::StatusCode;
-use crate::services::shorten_url_write::{delete_url, get_urls, increase_view_count, store_new_url, update_shorten_url_name};
+use crate::services::shorten_url_write::{delete_url, get_original_url_service, get_urls, increase_view_count, store_new_url, update_shorten_url_name};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
 
@@ -112,11 +112,11 @@ impl UrlShortnerService for UrlShortnerServerServices {
         }
     }
 
-    async fn increment_count(&self, request: Request<Count>) -> Result<Response<SuccessMessage>, Status> {
+    async fn increment_count(&self, request: Request<Url>) -> Result<Response<SuccessMessage>, Status> {
         tracing::info!("Incrementing count was going to execute") ;
-        let count = request.into_inner();
-        tracing::info!("Received request: {:?}", count);
-        let result = increase_view_count(&count.shorten_url, &self.db).await ;
+        let url = request.into_inner();
+        tracing::info!("Received request: {:?}", url);
+        let result = increase_view_count(&url.url, &self.db).await ;
         match result {
             Ok(res) => {
                 tracing::info!("Count incremented successfully");
@@ -129,6 +129,28 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while incrementing count: {:?}", err);
+                Err(Status::aborted(err))
+            }
+        }
+    }
+
+    async fn get_original_url(&self, request: Request<Url>) -> Result<Response<Url>, Status> {
+        tracing::info!("get_original_url was going to execute") ;
+        let url = request.into_inner();
+        tracing::info!("Received request: {:?}", url);
+        let result = get_original_url_service(&url.url, &self.db).await ;
+
+        match result {
+            Ok(res) => {
+                tracing::info!("Successfully got original url");
+                Ok(Response::new(
+                    Url {
+                        url: res
+                    }
+                ))
+            },
+            Err(err) => {
+                tracing::error!("Error while getting original url: {:?}", err);
                 Err(Status::aborted(err))
             }
         }

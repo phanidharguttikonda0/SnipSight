@@ -8,3 +8,8 @@ pub struct UrlModel {
     pub view_count: i32,
     pub created_at: NaiveDateTime,
 }
+
+#[derive(sqlx::FromRow, Debug)]
+pub struct OriginalUrlModel {
+    pub original_url: String,
+}

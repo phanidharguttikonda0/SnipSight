@@ -2,7 +2,7 @@ use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayl
 use sqlx::{Error, FromRow, Pool, Postgres, Row};
 use sqlx::postgres::PgRow;
 use tonic::Status;
-use crate::models::UrlModel;
+use crate::models::{UrlModel, OriginalUrlModel};
 
 pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>) -> Result<(String, i32), String> {
 
@@ -122,7 +122,7 @@ pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<bo
 
 
 pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Result<bool, String> {
-    tracing::info!("shorten url was called with the shorten_url {}", shorten_url) ;
+    tracing::info!("increase_view_count was called with the shorten_url {}", shorten_url) ;
     let result = sqlx::query("update website_urls SET view_count=view_count+1 where shorten_url=$1")
         .bind(shorten_url).execute(db).await ;
 
@@ -137,6 +137,23 @@ pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Resu
         },
         Err(err) => {
             tracing::error!("The Error was {}", err) ;
+            Err(err.to_string())
+        }
+    }
+}
+
+pub async fn get_original_url_service(shorten_url: &str, db: &Pool<Postgres>) -> Result<String, String> {
+    tracing::info!("get_original_url was called with the shorten_url {}", shorten_url) ;
+    let result = sqlx::query_as::<_, OriginalUrlModel>
+        ("select original_url from website_urls where shorten_url=$1")
+        .bind(shorten_url).fetch_one(db).await ;
+    match result {
+        Ok(res) => {
+            tracing::info!("the res was {:?}", res) ;
+            Ok(res.original_url)
+        },
+        Err(err) => {
+            tracing::error!("error was {}", err) ;
             Err(err.to_string())
         }
     }
