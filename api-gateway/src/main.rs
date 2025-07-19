@@ -5,10 +5,9 @@ mod services;
 mod models;
 
 use axum::{middleware, Router};
-use axum::http::Method;
+use axum::http::{HeaderValue, Method};
 use axum::routing::get;
 use tower_http::cors::{Any, CorsLayer};
-use middlewares::authentication_middlewares;
 use crate::controllers::url_shortner_handler::redirect_url;
 use crate::middlewares::authentication_middlewares::authorization_check;
 use crate::routes::authentication_routes::authentication_routes;
@@ -28,7 +27,7 @@ async fn main() {
 
     // Build the CORS layer
     let cors = CorsLayer::new()
-        .allow_origin(Any) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
+        .allow_origin("https://snipsight.phani.services/".parse::<HeaderValue>().unwrap()) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers(Any);
 
