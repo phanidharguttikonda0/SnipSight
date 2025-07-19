@@ -11,9 +11,7 @@ use crate::models::url_shorten_models::UrlShortenModel;
 pub fn validate_url_shortner_name(input: &str) -> Result<(), ValidationError> {
     let allowed_chars = Regex::new(r"^[a-zA-Z0-9_-]{5,}$").unwrap();
 
-    let result = allowed_chars.is_match(input)
-        && !input.ends_with('-')
-        && input.chars().any(|c| c.is_ascii_digit()) ;
+    let result = allowed_chars.is_match(input) && !input.ends_with('-') ;
     if result {
         Ok(())
     } else {
