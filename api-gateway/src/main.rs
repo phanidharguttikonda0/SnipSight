@@ -28,7 +28,7 @@ async fn main() {
     // Build the CORS layer
     let cors = CorsLayer::new()
         .allow_origin("https://snipsight.phani.services".parse::<HeaderValue>().unwrap()) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_methods(Any)
         .allow_headers(Any);
 
     let app = routes(cors).await ;
@@ -51,10 +51,10 @@ async fn routes(cors_layer: CorsLayer) -> Router {
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())
-        .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
         .nest("/authentication", authentication_routes())
-        .route("/{shorten_url}", get(redirect_url))
         .layer(cors_layer)
+        .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
+        .route("/{shorten_url}", get(redirect_url))
 }
 
 async fn get_jwt_secret() -> String {
