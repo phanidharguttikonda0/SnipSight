@@ -1,7 +1,7 @@
 import axios from "axios"
 import type { AxiosRequestConfig, AxiosResponse } from "axios"
 
-export const API_BASE_URL = "https://ec2-15-206-147-138.ap-south-1.compute.amazonaws.com"
+export const API_BASE_URL = "https://api.snipsight.phani.services"
 
 const api = axios.create({
   baseURL: API_BASE_URL,
