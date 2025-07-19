@@ -11,10 +11,13 @@ service UrlShortnerService {
   rpc DeleteShortenUrl(UrlId) returns(SuccessMessage);
   rpc UpdateShortenUrl(CustomName) returns(UpdatedCustomName);
   rpc getShortenUrlsList(User) returns(UrlsList) ;
+  rpc incrementCount(Count) returns(SuccessMessage) ;
   // from here we need to design the key insights sharing , how it gonna reach other side
 }
 
-
+message Count {
+  string shorten_url = 1;
+}
 
 message User {
   int32 user_id = 1 ;
