@@ -49,12 +49,12 @@ async fn main() {
 async fn routes(cors_layer: CorsLayer) -> Router {
     let secret = get_jwt_secret().await;
     Router::new()
-        .route("/{shorten_url}", get(redirect_url))
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())
         .layer(middleware::from_fn_with_state(AppState{ secret_key: secret}, authorization_check))
         .nest("/authentication", authentication_routes())
+        .route("/{shorten_url}", get(redirect_url))
         .layer(cors_layer)
 }
 
