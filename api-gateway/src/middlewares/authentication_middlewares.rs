@@ -3,7 +3,7 @@ use axum::middleware::Next;
 use axum::{extract::{Request}, response::Response} ;
 use axum::body::{to_bytes, Body, Bytes};
 use axum::extract::State;
-use axum::http::StatusCode;
+use axum::http::{Method, StatusCode};
 use axum::response::IntoResponse;
 use crate::models::responses::ErrorResponse;
 use jsonwebtoken::{decode, DecodingKey, Validation};
@@ -15,6 +15,12 @@ use crate::AppState;
 
 // We are going to use the OAuth
 pub async fn authorization_check(State(state): State<AppState>, mut req: Request, next: Next) -> Result<Response, impl IntoResponse> {
+
+    if req.method() == Method::OPTIONS {
+        return Ok(next.run(req).await);
+    } // this will be executed by the cors
+
+    // the below will be executed as usual
     // let's learn about how do we design a response for the whole application
     let jwt_secret = state.secret_key ;
     let secret = String::from(jwt_secret.as_str());
