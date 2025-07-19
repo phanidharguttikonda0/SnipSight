@@ -15,14 +15,14 @@ import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Eye, EyeOff } from "lucide-react"
 
-const countries = [
-  { id: 1, name: "United States" },
+const countries: { id: number; name: string }[] = [
+  { id: 7, name: "United States" },
   { id: 2, name: "United Kingdom" },
   { id: 3, name: "Canada" },
   { id: 4, name: "Australia" },
   { id: 5, name: "Germany" },
   { id: 6, name: "France" },
-  { id: 7, name: "India" },
+  { id: 1, name: "India" },
   { id: 8, name: "Japan" },
 ]
 
@@ -32,7 +32,7 @@ export default function SignUpPage() {
     password: "",
     mail_id: "",
     mobile: "",
-    country_id: "",
+    country_id: "1",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
