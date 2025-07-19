@@ -255,7 +255,7 @@ export default function DashboardPage() {
                       <TableRow>
                         <TableHead>Original URL</TableHead>
                         <TableHead>Short URL</TableHead>
-                        <TableHead>Clicks</TableHead>
+                        <TableHead>Views</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
