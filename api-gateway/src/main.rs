@@ -9,6 +9,7 @@ use axum::http::Method;
 use axum::routing::get;
 use tower_http::cors::{Any, CorsLayer};
 use middlewares::authentication_middlewares;
+use crate::controllers::url_shortner_handler::redirect_url;
 use crate::middlewares::authentication_middlewares::authorization_check;
 use crate::routes::authentication_routes::authentication_routes;
 use crate::routes::file_sharing_routes::file_sharing_routes;
@@ -48,9 +49,7 @@ async fn main() {
 async fn routes(cors_layer: CorsLayer) -> Router {
     let secret = get_jwt_secret().await;
     Router::new()
-        .route("/{shorten_url}", get(|| async {
-            tracing::info!("this route takes care of the url's whether it gonna be file sharing or shorten url website");
-        }))
+        .route("/{shorten_url}", get(redirect_url))
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())

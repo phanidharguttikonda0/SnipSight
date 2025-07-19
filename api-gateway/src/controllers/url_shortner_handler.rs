@@ -2,7 +2,7 @@ use axum::{Extension, Form, Json};
 use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
 use hyper::StatusCode;
-use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User, Url};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use tonic::transport::{Channel, Error};
 use crate::models::authentication_models::Claims;
@@ -227,6 +227,65 @@ pub async fn update_url(Path((id, new_name)): Path<(i32, String)>,Extension(clai
                     }
                 )
             ))
+        }
+    }
+}
+
+
+
+pub async fn redirect_url(Path(shorten_url): Path<String>) -> impl IntoResponse {
+    tracing::info!("redirect url request recieved to the gate_way ") ;
+
+    let client = create_grpc_connection().await;
+
+    match client {
+        Ok(mut client) => {
+            let request = tonic::Request::new(
+                    Url {
+                        url: shorten_url.clone(),
+                    }
+            ) ;
+
+            let response = client.get_original_url(request).await ;
+            match response {
+                Ok(response) => {
+                    tracing::info!("Response from gRPC server: {:?}", response);
+
+                    // Now we are going to store the count
+                    let request = tonic::Request::new(
+                        Url {
+                            url: shorten_url,
+                        }
+                    ) ;
+
+                    let response1 = client.increment_count(request).await ;
+
+                    match response1 {
+                        Ok(response1) => {
+                            if response1.into_inner().operation {
+                                tracing::info!("count incremented successfully") ;
+                                axum::response::Redirect::temporary(&response.into_inner().url).into_response()
+                            }else{
+                                StatusCode::NOT_FOUND.into_response()
+                            }
+                        }
+                        Err(error) =>{
+                            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                        }
+                    }
+
+
+                },
+                Err(error) =>{
+                    tracing::error!("Error in gRPC server response: {}", error);
+                    StatusCode::NOT_FOUND.into_response()
+                }
+            }
+
+        },
+        Err(err) => {
+            tracing::error!("unable to connect to gRPC : {}", err);
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
         }
     }
 }

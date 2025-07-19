@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-proto-definations-snip-sight = "0.1.2"
+proto-definations-snip-sight = "0.1.4"
 axum = "0.8.4"
 tracing = "0.1.41"
 tokio = {version = "1.46.1", features = ["full"]}
