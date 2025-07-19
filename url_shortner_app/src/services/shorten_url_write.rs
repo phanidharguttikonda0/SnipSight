@@ -119,3 +119,25 @@ pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<bo
         }
     }
 }
+
+
+pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Result<bool, String> {
+    tracing::info!("shorten url was called with the shorten_url {}", shorten_url) ;
+    let result = sqlx::query("update website_urls SET view_count=view_count+1 where shorten_url=$1")
+        .bind(shorten_url).execute(db).await ;
+
+    match result {
+        Ok(res) => {
+            tracing::info!("got the result") ;
+            if res.rows_affected() > 0 {
+                Ok(true)
+            }else{
+                Ok(false)
+            }
+        },
+        Err(err) => {
+            tracing::error!("The Error was {}", err) ;
+            Err(err.to_string())
+        }
+    }
+}

@@ -1970,9 +1970,9 @@ dependencies = [
 
 [[package]]
 name = "proto-definations-snip-sight"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea15db850a0493af0e74f034ef5b43ee85377a852422d49db62bc1fe77ee8d8c"
+checksum = "ade13f4f018752421860ab93646dc656c91008d3f2c6beac71858c3ea80b6e55"
 dependencies = [
  "prost",
  "prost-types",

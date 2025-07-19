@@ -1,11 +1,11 @@
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::{UrlShortnerService};
-use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Shorten};
+use proto_definations_snip_sight::generated::url_shortner::{Count, CreateShortenUrlPayload, Shorten};
 use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
 use sqlx::{Pool, Postgres};
 use tonic::codegen::http::StatusCode;
-use crate::services::shorten_url_write::{delete_url, get_urls, store_new_url, update_shorten_url_name};
+use crate::services::shorten_url_write::{delete_url, get_urls, increase_view_count, store_new_url, update_shorten_url_name};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
 
@@ -108,6 +108,28 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 Err(Status::internal(format!("{}", err)))
+            }
+        }
+    }
+
+    async fn increment_count(&self, request: Request<Count>) -> Result<Response<SuccessMessage>, Status> {
+        tracing::info!("Incrementing count was going to execute") ;
+        let count = request.into_inner();
+        tracing::info!("Received request: {:?}", count);
+        let result = increase_view_count(&count.shorten_url, &self.db).await ;
+        match result {
+            Ok(res) => {
+                tracing::info!("Count incremented successfully");
+                Ok(Response::new(
+                    SuccessMessage {
+                        cause: "None".to_string(),
+                        operation: res
+                    }
+                ))
+            },
+            Err(err) => {
+                tracing::error!("Error while incrementing count: {:?}", err);
+                Err(Status::aborted(err))
             }
         }
     }
