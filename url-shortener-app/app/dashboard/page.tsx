@@ -281,7 +281,7 @@ export default function DashboardPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{url.clicks || 0}</Badge>
+                            <Badge variant="secondary">{url.view_count || 0}</Badge>
                           </TableCell>
                           <TableCell>
                             {url.created_at ? new Date(url.created_at).toLocaleDateString() : "N/A"}
