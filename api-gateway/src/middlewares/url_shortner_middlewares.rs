@@ -6,15 +6,21 @@ use reqwest::RequestBuilder;
 use validator::{Validate, ValidationError};
 use crate::models::url_shorten_models::UrlShortenModel;
 
-const CUSTOM_NAME_REGEX: &str = r"^(?=[a-zA-Z0-9_-]{5,}$)(?!.*-$)[a-zA-Z_-]*[a-zA-Z_-]?[0-9]+$" ;
 
-pub fn validate_url_shortner_name(name: &str) -> Result<(), ValidationError> {
-    if Regex::new(CUSTOM_NAME_REGEX).unwrap().is_match(name) {
+
+pub fn validate_url_shortner_name(input: &str) -> Result<(), ValidationError> {
+    let allowed_chars = Regex::new(r"^[a-zA-Z0-9_-]{5,}$").unwrap();
+
+    let result = allowed_chars.is_match(input)
+        && !input.ends_with('-')
+        && input.chars().any(|c| c.is_ascii_digit()) ;
+    if result {
         Ok(())
-    }else {
-        Err(ValidationError::new("Invalid URL shortner name"))
+    } else {
+        Err(ValidationError::new("Invalid Shorten Url Name"))
     }
 }
+
 
 pub async fn create_shorten_url_validation(mut req: Request, next: Next) -> Result<Response, impl IntoResponse>
 {
