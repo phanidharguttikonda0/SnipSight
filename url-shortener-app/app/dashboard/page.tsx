@@ -130,7 +130,7 @@ export default function DashboardPage() {
     try {
       const response = await urlAPI.deleteUrl(id)
       // Only remove from state if delete was successful (status 200)
-      if (response.status === 200) {
+      if (response.status === 204) {
         setUrls((prevUrls) => prevUrls.filter((url) => url.id !== id))
         toast({
           title: "URL deleted!",
