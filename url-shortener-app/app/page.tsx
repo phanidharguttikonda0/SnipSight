@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { LinkIcon, Shield, BarChart3, Globe, Smartphone, Clock, QrCode, Eye, Download, Lock } from "lucide-react"
 import {useRouter} from "next/navigation";
+import {useEffect} from "react";
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()
@@ -13,9 +14,13 @@ export default function HomePage() {
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
-  if (localStorage.getItem("authHeader") !== undefined) {
-    router.push("/dashboard")
-  }
+  useEffect(() => {
+    const token = localStorage.getItem("authHeader")
+    if (token) {
+      router.push("/dashboard")
+    }
+  }, [])
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
