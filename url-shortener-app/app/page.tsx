@@ -15,15 +15,18 @@ export default function HomePage() {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
   useEffect(() => {
-    const token = localStorage.getItem("authHeader")
-    if (token) {
-      router.push("/dashboard")
+    if (!isLoading) {
+      const token = localStorage.getItem("authHeader")
+      if (token) {
+        router.push("/dashboard")
+      }
     }
-  }, [])
+  }, [isLoading])
 
-  if (user) {
-    return null
-  }
+
+  // if (user) {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
