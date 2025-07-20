@@ -16,9 +16,6 @@ export default function HomePage() {
   if (localStorage.getItem("authHeader") !== undefined) {
     router.push("/dashboard")
   }
-  if (user) {
-    return null // Will redirect to dashboard
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
