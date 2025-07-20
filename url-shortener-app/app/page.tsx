@@ -11,21 +11,15 @@ import {useEffect} from "react";
 export default function HomePage() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
-  if (isLoading) {
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/dashboard")
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading || user) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  }
-  // useEffect(() => {
-  //   if (!isLoading) {
-  //     const token = localStorage.getItem("authHeader")
-  //     if (token) {
-  //       router.push("/dashboard")
-  //     }
-  //   }
-  // }, [isLoading])
-
-
-  if (user) {
-    return null // redirects to the dashboard
   }
 
   return (
