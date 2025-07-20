@@ -17,9 +17,9 @@ async fn main() {
     // input validation is done in the api-gateway itself
 
     tracing::info!("going to create rds database connection");
-    if let Some(rds_connection) = create_connection(get_rds_url().await).await
+    let (rds_connection_url, jwt_secret) = get_urls().await;
+    if let Some(rds_connection) = create_connection(rds_connection_url).await
     {
-        let jwt_secret = get_jwt_key().await ;
         let app = create_app(rds_connection, jwt_secret);
 
         let tcp_listener = tokio::net::TcpListener::bind("0.0.0.0:9090").await.unwrap();
@@ -32,7 +32,7 @@ async fn main() {
 }
 
 
-async fn get_rds_url() -> String {
+async fn get_urls() -> (String, String) {
     // here we need to get the urls from the aws secret manager or what ever we use
     tracing::info!("going to get rds url");
 
@@ -43,29 +43,24 @@ async fn get_rds_url() -> String {
     let client = Client::new(&config);
 
     // Define your parameter name
-    let param_name = "/snipsight/db/rds";
-
+    let param_name1 = "/snipsight/db/rds";
+    let param_name2 = "/snipsight/jwt" ;
     // Fetch the parameter with decryption enabled
     let result = client
         .get_parameter()
-        .name(param_name)
+        .name(param_name1)
         .with_decryption(true)
         .send()
         .await.unwrap();
+    let result2 = client.get_parameter().name(param_name2).with_decryption(true).send().await.unwrap();
 
     // Extract and print the value
-    if let Some(value) = result.parameter().and_then(|p| p.value()) {
-        format!("{}{}",value, "authentication_app")
-    } else {
-        String::from("")
-    }
+
+    (result.parameter().and_then(|p| p.value()).unwrap().to_string(), result2.parameter().and_then(|p| p.value()).unwrap().to_string())
 
     // String::from("postgres://postgres:phani@localhost:5432/authentication_app") // -- for local testing
 }
 
-async fn get_jwt_key() -> String {
-    String::from("secret") // jwt secrets key
-}
 
 async fn create_connection(connection_url: String) -> Option<Pool<Postgres>> {
     let pool = PgPool::connect(&connection_url).await ;
