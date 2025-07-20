@@ -14,19 +14,19 @@ export default function HomePage() {
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
-  useEffect(() => {
-    if (!isLoading) {
-      const token = localStorage.getItem("authHeader")
-      if (token) {
-        router.push("/dashboard")
-      }
-    }
-  }, [isLoading])
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     const token = localStorage.getItem("authHeader")
+  //     if (token) {
+  //       router.push("/dashboard")
+  //     }
+  //   }
+  // }, [isLoading])
 
 
-  // if (user) {
-  //   return null
-  // }
+  if (user) {
+    return null // redirects to the dashboard
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
