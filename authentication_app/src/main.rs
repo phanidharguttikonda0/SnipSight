@@ -55,8 +55,7 @@ async fn get_urls() -> (String, String) {
     let result2 = client.get_parameter().name(param_name2).with_decryption(true).send().await.unwrap();
 
     // Extract and print the value
-
-    (result.parameter().and_then(|p| p.value()).unwrap().to_string(), result2.parameter().and_then(|p| p.value()).unwrap().to_string())
+    (format!("{}{}",result.parameter().and_then(|p| p.value()).unwrap().to_string(),"authentication_app"), result2.parameter().and_then(|p| p.value()).unwrap().to_string())
 
     // String::from("postgres://postgres:phani@localhost:5432/authentication_app") // -- for local testing
 }
