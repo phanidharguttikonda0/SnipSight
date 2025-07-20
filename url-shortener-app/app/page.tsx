@@ -13,7 +13,7 @@ export default function HomePage() {
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
-  if (localStorage.getItem("authHeader")) {
+  if (localStorage.getItem("authHeader") !== undefined) {
     router.push("/dashboard")
   }
   if (user) {
