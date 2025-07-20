@@ -5,14 +5,17 @@ import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { LinkIcon, Shield, BarChart3, Globe, Smartphone, Clock, QrCode, Eye, Download, Lock } from "lucide-react"
+import {useRouter} from "next/navigation";
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()
-
+  const router = useRouter()
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
-
+  if (localStorage.getItem("authHeader")) {
+    router.push("/dashboard")
+  }
   if (user) {
     return null // Will redirect to dashboard
   }
