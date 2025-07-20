@@ -14,6 +14,8 @@ use crate::routes::authentication_routes::authentication_routes;
 use crate::routes::file_sharing_routes::file_sharing_routes;
 use crate::routes::payments_routes::payment_routes;
 use crate::routes::url_shortner_routes::{url_shortner_routes};
+use aws_config::meta::region::RegionProviderChain;
+use aws_sdk_ssm::Client;
 #[derive(Clone)]
 pub struct AppState {
     pub secret_key: String,
@@ -66,5 +68,13 @@ async fn routes(cors_layer: CorsLayer) -> Router {
 
 async fn get_jwt_secret() -> String {
     // needs to use the ssm to get the secret key
-    String::from("secret")
+    let region_provider = RegionProviderChain::default_provider().or_else("ap-south-1");
+    let config = aws_config::from_env().region(region_provider).load().await;
+
+    // Create the SSM client
+    let client = Client::new(&config);
+
+    let param_name = "/snipsight/jwt";
+    let result = client.get_parameter().name(param_name).with_decryption(true).send().await.unwrap();
+    result.parameter().and_then(|p| p.value()).unwrap().to_string()
 }
