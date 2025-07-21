@@ -7,11 +7,9 @@ use serde_json::to_string;
 use aws_sdk_dynamodb::Client as DynamoClient;
 use aws_sdk_dynamodb::types::AttributeValue;
 
-pub async fn get_insights(request : GetInsights) -> Result<KeyInsights, String>{
+pub async fn get_insights(request : GetInsights, client: &DynamoClient) -> Result<KeyInsights, String>{
     // here we need to get the insights from the dynamo db
     tracing::info!("Getting insights from Dynamo DB");
-    let config = aws_config::load_defaults(BehaviorVersion::v2025_01_17()).await;
-    let client = DynamoClient::new(&config);
 
     let mut last_key = HashMap::new();
     last_key.insert("shorten_url".to_string(), AttributeValue::S(request.shorten_url.clone()));
@@ -53,6 +51,7 @@ pub async fn get_insights(request : GetInsights) -> Result<KeyInsights, String>{
                     key_map.get("insight_time").and_then(|v| v.as_s().ok()).unwrap_or(&String::from("")).to_string(),
                 ),
                 None => (request.shorten_url.clone(), "".to_string()), // fallback
+                // this executes, when there are no more records down the line
             };
 
             Ok(KeyInsights {

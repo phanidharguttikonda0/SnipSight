@@ -7,16 +7,17 @@ use sqlx::{Pool, Postgres};
 use crate::services::dynamo_db_operations::{get_insights, delete_insights};
 use crate::services::shorten_url_write::{delete_url, get_original_url_service, get_urls, increase_view_count, store_new_url, update_shorten_url_name};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
-
+use aws_sdk_dynamodb::Client as DynamoClient;
 
 #[derive(Debug)]
 pub struct UrlShortnerServerServices {
-    db: Arc<Pool<Postgres>>
+    db: Arc<Pool<Postgres>>,
+    client: Arc<DynamoClient>
 }
 
 impl UrlShortnerServerServices {
-    pub fn new(db: Arc<Pool<Postgres>>) -> Self {
-        Self { db }
+    pub fn new(db: Arc<Pool<Postgres>>, client: Arc<DynamoClient>) -> Self {
+        Self { db, client }
     }
 }
 
@@ -148,7 +149,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
         // we are going to get the data
         tracing::info!("get_key_insights was going to execute") ;
         let insights_request = request.into_inner() ;
-        match get_insights(insights_request).await {
+        match get_insights(insights_request, &self.client).await {
             Ok(result) => {
                 tracing::info!("Got the  Insights for the shorten url {}", result.shorten_url);
                 Ok(Response::new(result))

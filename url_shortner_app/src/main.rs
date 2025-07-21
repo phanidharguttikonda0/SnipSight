@@ -3,13 +3,14 @@ mod services;
 mod models;
 
 use std::sync::Arc;
+use aws_config::BehaviorVersion;
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_ssm::Client;
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::UrlShortnerServiceServer;
 use sqlx::{PgPool, Pool, Postgres};
 use server_service::UrlShortnerServerServices;
 use tonic::transport::Server;
-
+use aws_sdk_dynamodb::Client as DynamoClient;
 
 
 
@@ -21,7 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = "0.0.0.0:9091".parse()?;
     // let pool = PgPool::connect("postgres://postgres:phani@localhost:5432/url_shortner_service").await?; -- locally
     let pool = create_database_connections().await;
-    let service = UrlShortnerServerServices::new(Arc::new(pool));
+    let config = aws_config::load_defaults(BehaviorVersion::v2025_01_17()).await;
+    let client = DynamoClient::new(&config);
+    let service = UrlShortnerServerServices::new(Arc::new(pool), Arc::new(client));
 
     println!("Listening on {}", address);
 
