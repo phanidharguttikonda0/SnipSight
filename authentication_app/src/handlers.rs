@@ -33,11 +33,11 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
 
     match row {
         Ok(row) => {
-            let isSame = verify_password(&password,&row.2) ;
+            let is_same = verify_password(&password,&row.2) ;
 
-            match isSame {
-                Ok(isSame) => {
-                    if isSame {
+            match is_same {
+                Ok(is_same) => {
+                    if is_same {
                         tracing::info!("Correct credentials {:?}", row) ;
                         let header = create_authorization_header(String::from(&state.jwt_secret),row.0, row.1);
                         let mut headers = HeaderMap::new() ;
