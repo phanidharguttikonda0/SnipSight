@@ -19,6 +19,8 @@ service UrlShortnerService {
 
 message keyInsights{
   repeated Insight list = 1;
+  string shorten_url = 2;
+  string insight_time = 3;
 }
 
 message Insight {

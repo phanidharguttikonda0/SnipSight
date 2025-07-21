@@ -4,6 +4,10 @@
 pub struct KeyInsights {
     #[prost(message, repeated, tag = "1")]
     pub list: ::prost::alloc::vec::Vec<Insight>,
+    #[prost(string, tag = "2")]
+    pub shorten_url: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub insight_time: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
