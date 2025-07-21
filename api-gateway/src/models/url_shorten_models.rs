@@ -21,17 +21,48 @@ pub struct KeyInsights {
 }
 
 #[derive(Serialize, Debug)]
+#[derive(Clone)]
 pub struct Insight{
     pub ip_address: String,
-    pub location: String,
-    pub timestamp: String,
-    pub refferal_source: String,
-    pub others: Others
-}
-
-#[derive(Serialize, Debug)]
-pub struct Others {
+    pub refferal: String,
     pub device_type: String,
     pub browser: String,
     pub os: String
+}
+
+impl Insight {
+    pub fn new(ip_address: String, refferal: String, device_type: String, browser: String, os: String) -> Self {
+        Self {
+            ip_address,
+            refferal,
+            device_type,
+            browser,
+            os
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct InsightEvent {
+    pub message_type: String,
+    pub shorten_url: String,
+    pub ip_address: String,
+    pub refferal_source: String,
+    pub device_type: String,
+    pub browser: String,
+    pub os: String,
+}
+
+impl InsightEvent {
+    pub fn new(shorten_url: String, ip_address: String, refferal_source: String, device_type: String, browser: String, os: String) -> Self {
+        Self {
+            message_type: "CREATE_INSIGHT".to_string(),
+            shorten_url,
+            ip_address,
+            refferal_source,
+            device_type,
+            browser,
+            os
+        }
+    }
 }

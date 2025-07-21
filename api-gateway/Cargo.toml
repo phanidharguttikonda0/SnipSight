@@ -21,3 +21,6 @@ tonic = { version = "0.13.1", features = ["transport"] }
 tower-http = { version = "0.6.6", features = ["cors"] }
 aws-config = "1.8.2"
 aws-sdk-ssm = "1.85.0"
+user-agent-parser = "0.3.0"
+aws-sdk-sqs = "1.76.0"
+uuid = { version = "1.17.0", features = ["v4"] }

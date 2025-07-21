@@ -4,8 +4,9 @@ mod controllers;
 mod services;
 mod models;
 
+use std::sync::Arc;
 use axum::{middleware, Router};
-use axum::http::{HeaderValue, Method};
+use axum::http::{HeaderValue};
 use axum::routing::get;
 use tower_http::cors::{Any, CorsLayer};
 use crate::controllers::url_shortner_handler::redirect_url;
@@ -16,9 +17,13 @@ use crate::routes::payments_routes::payment_routes;
 use crate::routes::url_shortner_routes::{url_shortner_routes};
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_ssm::Client;
+use user_agent_parser::UserAgentParser;
+use crate::middlewares::url_shortner_middlewares::redirection_data_gathering;
+
 #[derive(Clone)]
 pub struct AppState {
     pub secret_key: String,
+    pub user_agent: Arc<UserAgentParser>,
 }
 
 #[tokio::main]
@@ -48,16 +53,22 @@ async fn main() {
 
 
 async fn routes(cors_layer: CorsLayer) -> Router {
+    let user_agent_parser = Arc::new(UserAgentParser::from_str(include_str!("regexes.yaml")).unwrap_or_else(|_| {
+        tracing::error!("Failed to initialize UserAgentParser. Ensure YAML definitions are correct or crate provides defaults.");
+        // Fallback to a default or panic if initialization is critical
+        UserAgentParser::from_str("").expect("Fallback UserAgentParser initialization failed")
+    }));
     let secret = get_jwt_secret().await;
+    let app_state = AppState { secret_key: secret, user_agent: user_agent_parser} ;
     let protected_routes = Router::new()
         .nest("/url-shortner", url_shortner_routes())
         .nest("/file-sharing", file_sharing_routes())
         .nest("/payment-routes", payment_routes())
-        .layer(middleware::from_fn_with_state(AppState { secret_key: secret }, authorization_check));
+        .layer(middleware::from_fn_with_state(app_state.clone(), authorization_check));
 
     let public_routes = Router::new()
         .nest("/authentication", authentication_routes())
-        .route("/{shorten_url}", get(redirect_url));
+        .route("/{shorten_url}", get(redirect_url).layer(middleware::from_fn_with_state(app_state.clone(),redirection_data_gathering)));
 
     Router::new()
         .merge(public_routes)
@@ -77,4 +88,5 @@ async fn get_jwt_secret() -> String {
     let param_name = "/snipsight/jwt";
     let result = client.get_parameter().name(param_name).with_decryption(true).send().await.unwrap();
     result.parameter().and_then(|p| p.value()).unwrap().to_string()
+    // String::from("secret")
 }

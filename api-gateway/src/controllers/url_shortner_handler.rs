@@ -5,9 +5,13 @@ use hyper::StatusCode;
 use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User, Url};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use tonic::transport::{Channel, Error};
+use crate::middlewares::url_shortner_middlewares::validate_url_shortner_name;
 use crate::models::authentication_models::Claims;
 use crate::models::responses::ErrorResponse;
-use crate::models::url_shorten_models::{KeyInsights, PaginationParams, UrlShortenModel};
+use crate::models::url_shorten_models::{Insight, InsightEvent, KeyInsights, PaginationParams, UrlShortenModel};
+use aws_sdk_sqs::{Client};
+use serde_json::to_string;
+use aws_config::BehaviorVersion;
 
 async fn create_grpc_connection() -> Result<UrlShortnerServiceClient<Channel>, Error> {
     UrlShortnerServiceClient::connect("http://url-shortner-container:9091").await
@@ -233,61 +237,92 @@ pub async fn update_url(Path((id, new_name)): Path<(i32, String)>,Extension(clai
 
 
 
-pub async fn redirect_url(Path(shorten_url): Path<String>) -> impl IntoResponse {
+pub async fn redirect_url(Path(shorten_url): Path<String>,Extension(insights): Extension<Insight>) -> impl IntoResponse {
     tracing::info!("redirect url request recieved to the gate_way ") ;
 
-    let client = create_grpc_connection().await;
+    match validate_url_shortner_name(&shorten_url)  {
+        Ok(_) => {
+            let client = create_grpc_connection().await;
 
-    match client {
-        Ok(mut client) => {
-            let request = tonic::Request::new(
-                    Url {
-                        url: shorten_url.clone(),
-                    }
-            ) ;
-
-            let response = client.get_original_url(request).await ;
-            match response {
-                Ok(response) => {
-                    tracing::info!("Response from gRPC server: {:?}", response);
-
-                    // Now we are going to store the count
+            match client {
+                Ok(mut client) => {
                     let request = tonic::Request::new(
                         Url {
-                            url: shorten_url,
+                            url: shorten_url.clone(),
                         }
                     ) ;
 
-                    let response1 = client.increment_count(request).await ;
+                    let response = client.get_original_url(request).await ;
+                    match response {
+                        Ok(response) => {
+                            tracing::info!("Response from gRPC server: {:?}", response);
 
-                    match response1 {
-                        Ok(response1) => {
-                            if response1.into_inner().operation {
-                                tracing::info!("count incremented successfully") ;
-                                axum::response::Redirect::temporary(&response.into_inner().url).into_response()
-                            }else{
-                                StatusCode::NOT_FOUND.into_response()
+                            // Now we are going to store the count
+                            let request = tonic::Request::new(
+                                Url {
+                                    url: shorten_url.clone(),
+                                }
+                            ) ;
+
+                            let response1 = client.increment_count(request).await ;
+
+                            match response1 {
+                                Ok(response1) => {
+                                    if response1.into_inner().operation {
+                                        tracing::info!("count incremented successfully") ;
+                                        // here we are going to call the SQS by passing the following insights
+
+                                        // Load AWS credentials from environment or EC2 IAM role
+                                        let config = aws_config::load_defaults(BehaviorVersion::v2025_01_17()).await;
+                                        let client = Client::new(&config);
+
+                                        // Your FIFO queue URL (get this from AWS Console)
+                                        let queue_url = "https://sqs.ap-south-1.amazonaws.com/637423550786/snipsightmessages.fifo";
+                                        let insights_event = InsightEvent::new(shorten_url,insights.ip_address,insights.refferal,insights.device_type,insights.browser,insights.os) ;
+                                        let message_body = to_string(&insights_event).unwrap();
+                                        let resp = client.send_message()
+                                            .queue_url(queue_url).message_body(message_body).message_group_id("insight-event")
+                                            .message_deduplication_id(uuid::Uuid::new_v4().to_string()).send().await; // all the messages of type insight-event go down the same lane, so when ever we are sending a create insight , we need send with the same name
+                                        match resp {
+                                            Ok(_) => {
+                                                tracing::info!("Message sent successfully") ;
+                                            },
+                                            Err(error) => {
+                                                tracing::error!("Error in sending message to SQS: {}", error);
+                                                tracing::info!("Message not sent successfully, But Redirection will takes place") ;
+                                            }
+                                        };
+                                        axum::response::Redirect::temporary(&response.into_inner().url).into_response()
+                                    }else{
+                                        StatusCode::NOT_FOUND.into_response()
+                                    }
+                                }
+                                Err(error) =>{
+                                    StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                                }
                             }
-                        }
+
+
+                        },
                         Err(error) =>{
-                            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                            tracing::error!("Error in gRPC server response: {}", error);
+                            StatusCode::NOT_FOUND.into_response()
                         }
                     }
 
-
                 },
-                Err(error) =>{
-                    tracing::error!("Error in gRPC server response: {}", error);
-                    StatusCode::NOT_FOUND.into_response()
+                Err(err) => {
+                    tracing::error!("unable to connect to gRPC : {}", err);
+                    StatusCode::INTERNAL_SERVER_ERROR.into_response()
                 }
             }
-
-        },
-        Err(err) => {
-            tracing::error!("unable to connect to gRPC : {}", err);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
+        Err(error) => {
+            tracing::error!("error occured in redirection for invalid shorten url name") ;
+            StatusCode::NOT_FOUND.into_response()
         }
     }
+
 }
 
 
