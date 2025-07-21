@@ -596,7 +596,7 @@ dependencies = [
 
 [[package]]
 name = "proto-definations-snip-sight"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "prost",
  "prost-types",
