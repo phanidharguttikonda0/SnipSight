@@ -2,7 +2,7 @@ use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayl
 use sqlx::{Error, FromRow, Pool, Postgres, Row};
 use sqlx::postgres::PgRow;
 use tonic::Status;
-use crate::models::{UrlModel, OriginalUrlModel};
+use crate::models::{UrlModel, URL};
 
 pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>) -> Result<(String, i32), String> {
 
@@ -91,20 +91,16 @@ pub async fn update_shorten_url_name(id: i32, name: &str, user_id: i32, db: &Poo
     }
 }
 
-pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
+pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<String, String> {
 
     tracing::info!("delete url was called with the id {}", id) ;
-    let result = sqlx::query("DELETE FROM website_urls WHERE id=$1 AND user_id=$2")
-        .bind(id).bind(user_id).execute(db).await ;
+    let result = sqlx::query_as::<_, URL>("DELETE FROM website_urls WHERE id=$1 AND user_id=$2 RETURNING shorten_url")
+        .bind(id).bind(user_id).fetch_one(db).await ;
 
     match result {
         Ok(result) => {
             tracing::info!("deletion happened") ;
-            if result.rows_affected() > 0 {
-                Ok(true)
-            }else {
-                Err(String::from("Not deleted, the Id doesn't exists"))
-            }
+            Ok(result.url)
         },
         Err(error) => {
             tracing::error!("error while deleting the url was {}", error) ;
@@ -144,13 +140,13 @@ pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Resu
 
 pub async fn get_original_url_service(shorten_url: &str, db: &Pool<Postgres>) -> Result<String, String> {
     tracing::info!("get_original_url was called with the shorten_url {}", shorten_url) ;
-    let result = sqlx::query_as::<_, OriginalUrlModel>
+    let result = sqlx::query_as::<_, URL>
         ("select original_url from website_urls where shorten_url=$1")
         .bind(shorten_url).fetch_one(db).await ;
     match result {
         Ok(res) => {
             tracing::info!("the res was {:?}", res) ;
-            Ok(res.original_url)
+            Ok(res.url)
         },
         Err(err) => {
             tracing::error!("error was {}", err) ;

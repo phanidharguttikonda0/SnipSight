@@ -1,10 +1,10 @@
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_server::{UrlShortnerService};
-use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Shorten, Url};
-use proto_definations_snip_sight::generated::url_shortner::{CustomName, SuccessMessage, UpdatedCustomName, UrlId, UrlsList, User};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, GetInsights, KeyInsights, Shorten, Url};
+use proto_definations_snip_sight::generated::url_shortner::{SuccessMessage, UrlId, UrlsList, User};
 use sqlx::{Pool, Postgres};
-use tonic::codegen::http::StatusCode;
+use crate::services::dynamo_db_operations::{get_insights, delete_insights};
 use crate::services::shorten_url_write::{delete_url, get_original_url_service, get_urls, increase_view_count, store_new_url, update_shorten_url_name};
 // the message payloads are converted to structs, this is why gRPC is any language supporter
 
@@ -54,8 +54,19 @@ impl UrlShortnerService for UrlShortnerServerServices {
         let result = delete_url(details.id, details.user_id,&self.db).await ;
 
         match result {
-            Ok(_) => {
+            Ok(shorten_url) => {
                 tracing::info!("Deleted successfully");
+                // here we are going to delete the delete Operations in the dynamo db
+
+                match delete_insights(shorten_url).await {
+                    Ok(message_id) => {
+                        tracing::info!("Deleted successfully from Dynamo Db as well here is message id {}", message_id);
+                    },
+                    Err(err) => {
+                        tracing::error!("Error while deleting insights: {:?}", err);
+                    }
+                }
+
                 Ok(Response::new(
                     SuccessMessage {
                         cause: "None".to_string(),
@@ -65,29 +76,6 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while deleting url: {:?}", err);
-                Err(Status::aborted(err))
-            }
-        }
-    }
-
-    async fn update_shorten_url(&self, request: Request<CustomName>) -> Result<Response<UpdatedCustomName>, Status> {
-        tracing::info!("Updating shorten url was going to execute") ;
-        let details = request.into_inner() ;
-        tracing::info!("Received request: {:?}", details);
-        let result = update_shorten_url_name(details.id,&details.custom_name,details.user_id, &self.db).await ;
-
-        match result {
-            Ok(_) => {
-                tracing::info!("Updated Successfully successfully");
-                Ok(Response::new(
-                    UpdatedCustomName {
-                        cause: "None".to_string(),
-                        new_name: details.custom_name
-                    }
-                ))
-            },
-            Err(err) => {
-                tracing::error!("Error while updating custom name for url: {:?}", err);
                 Err(Status::aborted(err))
             }
         }
@@ -151,6 +139,22 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while getting original url: {:?}", err);
+                Err(Status::aborted(err))
+            }
+        }
+    }
+
+    async fn get_key_insights(&self, request: Request<GetInsights>) -> Result<Response<KeyInsights>, Status> {
+        // we are going to get the data
+        tracing::info!("get_key_insights was going to execute") ;
+        let insights_request = request.into_inner() ;
+        match get_insights(insights_request).await {
+            Ok(result) => {
+                tracing::info!("Got the  Insights for the shorten url {}", result.shorten_url);
+                Ok(Response::new(result))
+            },
+            Err(err) => {
+                tracing::error!("Error while getting insights: {:?}", err);
                 Err(Status::aborted(err))
             }
         }

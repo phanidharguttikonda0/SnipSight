@@ -1,4 +1,5 @@
 use chrono::NaiveDateTime;
+use serde::Serialize;
 
 #[derive(sqlx::FromRow)]
 pub struct UrlModel {
@@ -10,6 +11,12 @@ pub struct UrlModel {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-pub struct OriginalUrlModel {
-    pub original_url: String,
+pub struct URL {
+    pub url: String,
+}
+
+#[derive(Serialize, Debug)]
+pub struct DeleteInsight{
+    pub message_type: String,
+    pub shorten_url: String
 }
