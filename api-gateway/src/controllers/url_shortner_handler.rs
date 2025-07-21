@@ -284,8 +284,8 @@ pub async fn redirect_url(Path(shorten_url): Path<String>,Extension(insights): E
                                             .queue_url(queue_url).message_body(message_body).message_group_id("insight-event")
                                             .message_deduplication_id(uuid::Uuid::new_v4().to_string()).send().await; // all the messages of type insight-event go down the same lane, so when ever we are sending a create insight , we need send with the same name
                                         match resp {
-                                            Ok(_) => {
-                                                tracing::info!("Message sent successfully") ;
+                                            Ok(message) => {
+                                                tracing::info!("Message sent successfully the id was {}", message.message_id.unwrap()) ;
                                             },
                                             Err(error) => {
                                                 tracing::error!("Error in sending message to SQS: {:?}", error);
