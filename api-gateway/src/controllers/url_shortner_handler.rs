@@ -2,7 +2,7 @@ use axum::{Extension, Form, Json};
 use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
 use hyper::StatusCode;
-use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User, Url};
+use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, CustomName, UrlId, User, Url, GetInsights};
 use proto_definations_snip_sight::generated::url_shortner::url_shortner_service_client::UrlShortnerServiceClient;
 use tonic::transport::{Channel, Error};
 use crate::middlewares::url_shortner_middlewares::validate_url_shortner_name;
@@ -271,28 +271,100 @@ pub async fn redirect_url(Path(shorten_url): Path<String>,Extension(insights): E
 }
 
 
-pub async fn get_key_insights(Path(id):Path<i32>, Query(params):Query<PaginationParams>, Extension(claims):Extension<Claims>) -> Result<impl IntoResponse,impl IntoResponse> {
+pub async fn get_key_insights(Path((shorten_url, page_size, last_evaluated_key)):Path<(String, u32, String)>, Query(params):Query<PaginationParams>, Extension(claims):Extension<Claims>) -> Result<impl IntoResponse,impl IntoResponse> {
 
-    if params.page_number.is_some() || params.page_size.is_some() {
+    if last_evaluated_key.is_empty() {
         return Err(
             (
                 StatusCode::BAD_REQUEST,
                 Json(
                     ErrorResponse {
-                        message: "Page number and page size are not allowed".to_string(),
+                        message: "Mention Last evaluated Key".to_string(),
                     }
                 )
                 )
         )
     }
-    Ok(
-        (
-            StatusCode::OK,
-            Json(
-                    KeyInsights {
-                        insights: vec![]
+
+    match validate_url_shortner_name(&shorten_url) {
+        Ok(_) => {
+            if page_size < 1 || page_size > 100 {
+                return Err(
+                    (
+                        StatusCode::BAD_REQUEST,
+                        Json(
+                            ErrorResponse {
+                                message: "Page size should be between 1 and 100".to_string(),
+                            }
+                        )
+                    )
+                )
+            }
+
+            // we are going to send the request
+
+            let client = create_grpc_connection().await ;
+            match client {
+                Ok(mut client) => {
+                    let request = tonic::Request::new(GetInsights{
+                        last_evaluated_key,
+                        shorten_url,
+                        page_size
+                    }) ;
+
+                    let response = client.get_key_insights(request).await ;
+                    match response {
+                        Ok(response) => {
+                            tracing::info!("Response from gRPC server: {:?}", response);
+                            Ok(
+                                (
+                                    StatusCode::OK,
+                                    to_string(&response.into_inner()).unwrap()
+                                )
+                            )
+                        },
+                        Err(error) => {
+                            tracing::error!("Error in gRPC server response: {}", error);
+                            Err(
+                                (
+                                    StatusCode::INTERNAL_SERVER_ERROR,
+                                    Json(
+                                        ErrorResponse {
+                                            message: "Error in getting response from gRPC".to_string(),
+                                        }
+                                    )
+                                )
+                            )
+                        }
                     }
+                },
+                Err(error) => {
+                    tracing::error!("unable to connect to gRPC : {}", error);
+                    return Err(
+                        (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(
+                                ErrorResponse {
+                                    message: "Error in getting response from gRPC".to_string(),
+                                }
+                            )
+                        )
+                    )
+                }
+            }
+        },
+        Err(error) => {
+            tracing::error!("error occured in redirection for invalid shorten url name : {}", error) ;
+            return Err(
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(
+                        ErrorResponse {
+                            message: "Invalid Shorten Url".to_string(),
+                        }
+                    )
+                )
             )
-        )
-    )
+        }
+    }
 }
