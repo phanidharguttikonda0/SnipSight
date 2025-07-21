@@ -11,8 +11,13 @@ pub struct UrlModel {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-pub struct URL {
-    pub url: String,
+pub struct ShortenUrl {
+    pub shorten_url: String,
+}
+
+#[derive(sqlx::FromRow, Debug)]
+pub struct OriginalUrl {
+    pub original_url: String,
 }
 
 #[derive(Serialize, Debug)]

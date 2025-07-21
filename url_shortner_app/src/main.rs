@@ -43,7 +43,6 @@ async fn get_database_connection_urls() -> (String, String) {
 
     // Define your parameter name
     let param_name = "/snipsight/db/rds";
-    let param_name_dynamodb = "/snipsight/db/dynamodb";
 
     // Fetch the parameter with decryption enabled
     let result1 = client
