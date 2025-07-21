@@ -179,62 +179,6 @@ pub async fn delete_url(Path(id): Path<i32>,Extension(claims): Extension<Claims>
     }
 }
 
-pub async fn update_url(Path((id, new_name)): Path<(i32, String)>,Extension(claims): Extension<Claims>) -> impl IntoResponse {
-
-    tracing::info!("update url request recieved to the gate_way ") ;
-    let client = create_grpc_connection().await;
-
-    match client {
-        Ok(mut client) => {
-
-            let request = tonic::Request::new(
-                CustomName {
-                    user_id: claims.user_id,
-                    custom_name: new_name,
-                    id
-                }
-            ) ;
-
-            let response = client.update_shorten_url(request).await ;
-            match response {
-                Ok(response) => {
-                    tracing::info!("Response from gRPC server: {:?}", response);
-                    Ok(
-                        (
-                            StatusCode::OK,
-                            serde_json::to_string(&response.into_inner()).unwrap()
-                        )
-                    )
-                }
-                Err(error) =>{
-                    tracing::error!("Error in gRPC server response: {}", error);
-                    Err((
-                        StatusCode::BAD_REQUEST,
-                        Json(
-                            ErrorResponse {
-                                message: error.message().to_string(),
-                            }
-                        )
-                    ))
-                }
-            }
-
-
-        },
-        Err(err) => {
-            tracing::error!("unable to connect to gRPC : {}", err);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(
-                    ErrorResponse {
-                        message: "Error in Connecting to gRPC".to_string(),
-                    }
-                )
-            ))
-        }
-    }
-}
-
 
 
 pub async fn redirect_url(Path(shorten_url): Path<String>,Extension(insights): Extension<Insight>) -> impl IntoResponse {
