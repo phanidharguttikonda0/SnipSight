@@ -98,31 +98,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleUpdateUrl = async () => {
-    if (!editingUrl || !newName.trim()) return
-
-    try {
-      const response = await urlAPI.updateUrl(editingUrl.id, newName)
-      const updatedShortUrl = response.data?.new_name || newName;
-      setUrls((prevUrls) =>
-        prevUrls.map((url) =>
-          url.id === editingUrl.id ? { ...url, shorten_url: updatedShortUrl } : url
-        )
-      );
-      toast({
-        title: "URL updated!",
-        description: "Your URL has been updated successfully.",
-      })
-      setEditingUrl(null)
-      setNewName("")
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to update URL",
-        variant: "destructive",
-      })
-    }
-  }
 
   const handleDeleteUrl = async (id: number) => {
     if (!confirm("Are you sure you want to delete this URL?")) return
@@ -296,45 +271,6 @@ export default function DashboardPage() {
                               >
                                 <BarChart3 className="w-4 h-4" />
                               </Button>
-
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => {
-                                      setEditingUrl(url)
-                                      setNewName(url.custom_name || "")
-                                    }}
-                                    title="Edit"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Edit URL</DialogTitle>
-                                    <DialogDescription>Update the custom name for this URL</DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="new_name">Custom Name</Label>
-                                      <Input
-                                        id="new_name"
-                                        value={newName}
-                                        onChange={(e) => setNewName(e.target.value)}
-                                        placeholder="Enter new custom name"
-                                      />
-                                    </div>
-                                    <div className="flex justify-end space-x-2">
-                                      <Button variant="outline" onClick={() => setEditingUrl(null)}>
-                                        Cancel
-                                      </Button>
-                                      <Button onClick={handleUpdateUrl}>Update</Button>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
 
                               <Button
                                 variant="ghost"
