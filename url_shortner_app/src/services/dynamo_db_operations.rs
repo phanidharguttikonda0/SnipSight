@@ -15,7 +15,7 @@ pub async fn get_insights(request : GetInsights) -> Result<KeyInsights, String>{
 
     let mut last_key = HashMap::new();
     last_key.insert("shorten_url".to_string(), AttributeValue::S(request.shorten_url.clone()));
-    last_key.insert("insight_time".to_string(), AttributeValue::S(request.last_evaluated_key)) ;// here last_evaluated_key was the insight time
+    last_key.insert("insight_time".to_string(), AttributeValue::S(request.last_evaluated_key.clone())) ;// here last_evaluated_key was the insight time
 
     let query = client.query()
         .table_name("ShortenURLInsights")
@@ -49,8 +49,8 @@ pub async fn get_insights(request : GetInsights) -> Result<KeyInsights, String>{
 
             let (shorten_url, insight_time) = match result.last_evaluated_key() {
                 Some(key_map) => (
-                    key_map.get("shorten_url").and_then(|v| v.as_s().ok()).unwrap_or(&request.shorten_url.clone()).to_string(),
-                    key_map.get("insight_time").and_then(|v| v.as_s().ok()).unwrap_or(&request.shorten_url).to_string(),
+                    key_map.get("shorten_url").and_then(|v| v.as_s().ok()).unwrap_or(&request.shorten_url).to_string(),
+                    key_map.get("insight_time").and_then(|v| v.as_s().ok()).unwrap_or(&String::from("")).to_string(),
                 ),
                 None => (request.shorten_url.clone(), "".to_string()), // fallback
             };
