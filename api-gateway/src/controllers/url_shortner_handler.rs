@@ -288,7 +288,8 @@ pub async fn redirect_url(Path(shorten_url): Path<String>,Extension(insights): E
                                                 tracing::info!("Message sent successfully") ;
                                             },
                                             Err(error) => {
-                                                tracing::error!("Error in sending message to SQS: {}", error);
+                                                tracing::error!("Error in sending message to SQS: {:?}", error);
+                                                tracing::error!("Error Type was {:?}", error.raw_response()) ;
                                                 tracing::info!("Message not sent successfully, But Redirection will takes place") ;
                                             }
                                         };
