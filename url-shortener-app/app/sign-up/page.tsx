@@ -44,19 +44,19 @@ export default function SignUpPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    if (!isValidUsernName(formData.username)) {
+    if (!isValidUsernName(formData.username.trim())) {
       toast({
         title: "Error",
         description: "Invalid Username format",
         variant: "destructive",
       });
-    } else if (!isValidEmail(formData.mail_id)) {
+    } else if (!isValidEmail(formData.mail_id.trim())) {
       toast({
         title: "Error",
         description: "Invalid Mail-Id",
         variant: "destructive",
       });
-    } else if (!isValidMobile(formData.mobile)){
+    } else if (!isValidMobile(formData.mobile.trim())){
       toast({
         title: "Error",
         description: "Invalid Mobile-Number",
@@ -65,7 +65,10 @@ export default function SignUpPage() {
     }else{
       try {
         const response = await authAPI.signUp({
-          ...formData,
+          username: formData.username.trim(),
+          mail_id: formData.mail_id.trim(),
+          mobile: formData.mobile.trim(),
+          password: formData.password.trim(),
           country_id: Number.parseInt(formData.country_id),
         })
 

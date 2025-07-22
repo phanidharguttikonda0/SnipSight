@@ -30,7 +30,7 @@ export default function SignInPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    if (!isValidUsernName(formData.username)) {
+    if (!isValidUsernName(formData.username.trim())) {
       toast({
         title: "Error",
         description: "choose a valid username",
@@ -38,7 +38,7 @@ export default function SignInPage() {
       });
     }else{
       try {
-        const response = await authAPI.signIn(formData.username, formData.password)
+        const response = await authAPI.signIn(formData.username.trim(), formData.password.trim())
 
         // Extract Authorization header ONLY from response headers (lowercase)
         const authHeader = response.headers.authorization;
