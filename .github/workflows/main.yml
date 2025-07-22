@@ -4,8 +4,18 @@ name: Deploy API Gateway
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'api-gateway/**'
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+    paths:
+      - 'api-gateway/**'
+      
 
 jobs:
   deploy:
