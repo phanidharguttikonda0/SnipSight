@@ -4,8 +4,18 @@ name: Deploy URL Shortner Service
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'url_shortner_app/**'
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+    paths:
+      - 'url_shortner_app/**'
+      
 
 jobs:
   deploy:
