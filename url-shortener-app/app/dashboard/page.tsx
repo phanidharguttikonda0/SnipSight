@@ -75,29 +75,43 @@ export default function DashboardPage() {
     }
   }
 
+
+
+  function isValidCustomName(input: string) {
+    const allowedChars = /^[a-zA-Z0-9_-]{5,}$/;
+    return allowedChars.test(input) && !input.endsWith('-');
+  }
+
   const handleCreateUrl = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsCreating(true)
+    if (createForm.custom_url.length !== 0 && !isValidCustomName(createForm.custom_url)) {
+        toast({
+          title: "Error",
+          description: "invalid custom name",
+        }) ;
+    }else{
+      try {
+        const response = await urlAPI.createUrl(createForm.original_url, createForm.custom_url || undefined)
 
-    try {
-      const response = await urlAPI.createUrl(createForm.original_url, createForm.custom_url || undefined)
+        toast({
+          title: "URL created!",
+          description: "Your short URL has been created successfully.",
+        })
 
-      toast({
-        title: "URL created!",
-        description: "Your short URL has been created successfully.",
-      })
-
-      setCreateForm({ original_url: "", custom_url: "" })
-      fetchUrls()
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to create URL",
-        variant: "destructive",
-      })
-    } finally {
-      setIsCreating(false)
+        setCreateForm({ original_url: "", custom_url: "" })
+        fetchUrls()
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to create URL",
+          variant: "destructive",
+        })
+      } finally {
+        setIsCreating(false)
+      }
     }
+
   }
 
 
