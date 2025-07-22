@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { LinkIcon, Copy, Edit, Trash2, BarChart3, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import {API_BASE_URL} from "@/lib/api";
+import { useRouter } from "next/navigation"
 interface UrlItem {
   id: number
   original_url: string
@@ -34,6 +35,7 @@ interface UrlItem {
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const [urls, setUrls] = useState<UrlItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
@@ -134,28 +136,18 @@ export default function DashboardPage() {
   const handleKeyInsights = async (shorten_url: string) => {
     try {
       const response = await urlAPI.getKeyInsights(shorten_url, 50, new Date().toISOString())
-      // For now, just show a toast. In a real app, you'd open a modal with insights
       if (response.status !== 200) {
         throw new Error("Could not load key insights")
       }
-
-      // here we need to write the logic for traversing to the new page, based on the response
-      // response body -> {"list":[],"shorten_url":"system-design","insight_time":""}
 
       if (response.data.list?.length === 0) {
         toast({
           title: "Key Insights",
           description: "No Insights Yet",
-        }) ;
-      }else{
-        // ----------- Cursor need to address this ------------------------------------
-        // response body -> {"list":[],"shorten_url":"system-design","insight_time":""}
-        // we need to create a new React function and over there we need to open the list of items in tabular form
-        // with full responsiveness, need to store the response over there , with paginations, if insight_time was not
-        // null then we need to have the button next page and we need to send request again to load the next pagination
-        // as the same, once the pagination was empty string , it means no next pages, the route in the front-end to be
-        // dashboard/shorten-url name , this you need to do , address this and create
-
+        })
+      } else {
+        // Navigate to the insights page
+        router.push(`/dashboard/insights/${shorten_url}`)
       }
 
     } catch (error: any) {
