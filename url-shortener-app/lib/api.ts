@@ -68,7 +68,7 @@ export const urlAPI = {
 
   deleteUrl: (id: number) => api.get(`/url-shortner/delete-url/${id}`),
 
-  getKeyInsights: (id: number) => api.get(`/url-shortner/key-insights/${id}`),
+  getKeyInsights: (shorten_url: string, page_size: number, last_evaluated_key: string) => api.get(`/url-shortner/key-insights/${shorten_url}/${page_size}/${last_evaluated_key}`),
 }
 
 export default api
