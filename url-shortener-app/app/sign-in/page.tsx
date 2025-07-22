@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Eye, EyeOff } from "lucide-react"
+import {isValidUsernName} from "@/app/sign-up/validation";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -24,52 +25,62 @@ export default function SignInPage() {
   const { login } = useAuth()
   const { toast } = useToast()
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    try {
-      const response = await authAPI.signIn(formData.username, formData.password)
-
-      // Extract Authorization header ONLY from response headers (lowercase)
-      const authHeader = response.headers.authorization;
-      console.log("The response headers are ",response.headers) ;
+    if (!isValidUsernName(formData.username)) {
       toast({
-        title: "Debug: Auth Header",
-        description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
-        variant: "default",
+        title: "Error",
+        description: "choose a valid username",
+        variant: "destructive"
       });
-      if (!authHeader) {
-        throw new Error("No Authorization header received from server");
-      }
-      localStorage.setItem("authHeader", authHeader);
-      // Create a minimal user object for login
-      let userData = undefined;
-      if (response.data && typeof response.data === 'object' && 'user' in response.data) {
-        userData = (response.data as any).user;
-      }
-      if (!userData) {
-        userData = {
-          username: formData.username,
-          email: "",
-        };
-      }
-      login(authHeader, userData);
+    }else{
+      try {
+        const response = await authAPI.signIn(formData.username, formData.password)
 
-      toast({
-        title: "Welcome back!",
-        description: "You have been signed in successfully.",
-      })
-    } catch (error: any) {
-      console.error("Sign in error:", error)
-      toast({
-        title: "Sign in failed",
-        description: error.response?.data?.message || error.message || "Invalid credentials",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+        // Extract Authorization header ONLY from response headers (lowercase)
+        const authHeader = response.headers.authorization;
+        console.log("The response headers are ",response.headers) ;
+        toast({
+          title: "Debug: Auth Header",
+          description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
+          variant: "default",
+        });
+        if (!authHeader) {
+          throw new Error("No Authorization header received from server");
+        }
+        localStorage.setItem("authHeader", authHeader);
+        // Create a minimal user object for login
+        let userData = undefined;
+        if (response.data && typeof response.data === 'object' && 'user' in response.data) {
+          userData = (response.data as any).user;
+        }
+        if (!userData) {
+          userData = {
+            username: formData.username,
+            email: "",
+          };
+        }
+        login(authHeader, userData);
+
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        })
+      } catch (error: any) {
+        console.error("Sign in error:", error)
+        toast({
+          title: "Sign in failed",
+          description: error.response?.data?.message || error.message || "Invalid credentials",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
+
   }
 
   return (

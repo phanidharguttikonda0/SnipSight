@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Eye, EyeOff } from "lucide-react"
+import {isValidUsernName,isValidEmail,isValidMobile} from "./validation"
 
 const countries: { id: number; name: string }[] = [
   { id: 2, name: "United States" },
@@ -43,49 +44,69 @@ export default function SignUpPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    try {
-      const response = await authAPI.signUp({
-        ...formData,
-        country_id: Number.parseInt(formData.country_id),
-      })
-
-      // Extract Authorization header ONLY from response headers (lowercase)
-      const authHeader = response.headers.authorization;
+    if (!isValidUsernName(formData.username)) {
       toast({
-        title: "Debug: Auth Header",
-        description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
-        variant: "default",
-      });
-      if (!authHeader) {
-        throw new Error("No Authorization header received from server");
-      }
-      localStorage.setItem("authHeader", authHeader);
-      // Extract user data from response body or create default
-      let userData: any = undefined;
-      if (response.data && typeof response.data === 'object' && 'user' in response.data) {
-        userData = (response.data as any).user;
-      }
-      if (!userData) {
-        userData = {
-          username: formData.username,
-          email: formData.mail_id,
-        };
-      }
-      login(authHeader, userData);
-
-      toast({
-        title: "Account created!",
-        description: "Welcome to SnipSight. Your account has been created successfully.",
-      })
-    } catch (error: any) {
-      console.error("Sign up error:", error)
-      toast({
-        title: "Sign up failed",
-        description: error.response?.data?.message || error.message || "Failed to create account",
+        title: "Error",
+        description: "Invalid Username format",
         variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+      });
+    } else if (!isValidEmail(formData.mail_id)) {
+      toast({
+        title: "Error",
+        description: "Invalid Mail-Id",
+        variant: "destructive",
+      });
+    } else if (!isValidMobile(formData.mobile)){
+      toast({
+        title: "Error",
+        description: "Invalid Mobile-Number",
+        variant: "destructive",
+      });
+    }else{
+      try {
+        const response = await authAPI.signUp({
+          ...formData,
+          country_id: Number.parseInt(formData.country_id),
+        })
+
+        // Extract Authorization header ONLY from response headers (lowercase)
+        const authHeader = response.headers.authorization;
+        toast({
+          title: "Debug: Auth Header",
+          description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
+          variant: "default",
+        });
+        if (!authHeader) {
+          throw new Error("No Authorization header received from server");
+        }
+        localStorage.setItem("authHeader", authHeader);
+        // Extract user data from response body or create default
+        let userData: any = undefined;
+        if (response.data && typeof response.data === 'object' && 'user' in response.data) {
+          userData = (response.data as any).user;
+        }
+        if (!userData) {
+          userData = {
+            username: formData.username,
+            email: formData.mail_id,
+          };
+        }
+        login(authHeader, userData);
+
+        toast({
+          title: "Account created!",
+          description: "Welcome to SnipSight. Your account has been created successfully.",
+        })
+      } catch (error: any) {
+        console.error("Sign up error:", error)
+        toast({
+          title: "Sign up failed",
+          description: error.response?.data?.message || error.message || "Failed to create account",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 

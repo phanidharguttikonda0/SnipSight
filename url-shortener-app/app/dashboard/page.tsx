@@ -89,6 +89,7 @@ export default function DashboardPage() {
         toast({
           title: "Error",
           description: "invalid custom name",
+          variant: "destructive"
         }) ;
     }else{
       try {
