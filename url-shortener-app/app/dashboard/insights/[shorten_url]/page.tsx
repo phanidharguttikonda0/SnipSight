@@ -57,6 +57,7 @@ export default function InsightsPage() {
         evaluatedKey
       )
 
+      // @ts-ignore
       const data: InsightsResponse = response.data
 
       if (page === 1) {
@@ -121,7 +122,7 @@ export default function InsightsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading insights...</p>
+            <p className="mt-4 text-gray-800">Loading insights...</p>
           </div>
         </div>
       </div>
