@@ -11,10 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { 
+import {
   ArrowLeft, BarChart3, ChevronRight, Globe, Monitor, Smartphone, Clock,
   TrendingUp, Users, MousePointer, MapPin, Calendar, Download, Filter,
-  Eye, Share2, ExternalLink, RefreshCw, Zap, Award, Target
+  Eye, Share2, ExternalLink, RefreshCw, Zap, Award, Target, CheckCircle
 } from "lucide-react"
 
 interface Insight {
