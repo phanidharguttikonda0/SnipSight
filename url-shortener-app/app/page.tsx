@@ -27,7 +27,7 @@ export default function HomePage() {
   // Animate stats on mount
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAnimatedStats({ urls: 2500000, clicks: 15000000, users: 50000 })
+      setAnimatedStats({ urls: 250, clicks: 5000, users: 50 })
     }, 500)
     return () => clearTimeout(timer)
   }, [])
