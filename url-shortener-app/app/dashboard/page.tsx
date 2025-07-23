@@ -455,9 +455,14 @@ export default function DashboardPage() {
                                 <Globe className="w-5 h-5 text-blue-600" />
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900 truncate max-w-xs" title={url.original_url}>
+                                <div
+                                    className="font-medium text-gray-900 truncate"
+                                    style={{ maxWidth: 'calc(100% - 6ch)' }}
+                                    title={url.original_url}
+                                >
                                   {url.original_url}
                                 </div>
+
                                 <div className="text-sm text-gray-500">
                                   {new URL(url.original_url).hostname}
                                 </div>
