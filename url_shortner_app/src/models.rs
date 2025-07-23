@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use tonic::{Code, Status};
 
 #[derive(sqlx::FromRow)]
 pub struct UrlModel {
@@ -50,9 +51,20 @@ impl ErrorMessage {
         }
     }
 }
-impl From<ErrorMessage> for tonic::Status {
+impl From<ErrorMessage> for Status {
     fn from(err: ErrorMessage) -> Self {
-        tonic::Status::internal(err.message)
+        // Map your custom `status_code` to a `tonic::Code`
+        let code = match err.status_code {
+            400 => Code::InvalidArgument,
+            401 => Code::Unauthenticated,
+            403 => Code::PermissionDenied,
+            404 => Code::NotFound,
+            409 => Code::AlreadyExists,
+            500 => Code::Internal,
+            _ => Code::Unknown,
+        };
+
+        Status::new(code, err.message)
     }
 }
 
