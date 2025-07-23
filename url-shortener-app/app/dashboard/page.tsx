@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-provider"
-import { urlAPI } from "@/lib/api"
+import {API_SHORTEN_URL, urlAPI} from "@/lib/api"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => copyToClipboard(`${API_BASE_URL}/${url.shorten_url}` || `error occured`)}
+                                onClick={() => copyToClipboard(`${API_SHORTEN_URL}/${url.shorten_url}` || `error occured`)}
                               >
                                 <Copy className="w-4 h-4" />
                               </Button>
