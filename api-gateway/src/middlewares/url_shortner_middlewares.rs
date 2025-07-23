@@ -86,6 +86,9 @@ pub async fn redirection_data_gathering(State(state): State<AppState>,req: Reque
         let device_name = user_agent.parse_device(ua_str).name
             .map(|cow_name| cow_name.to_string())
             .unwrap_or_else(|| "Unknown Device".to_string());
+        let engine = user_agent.parse_engine(ua_str).name
+            .map(|cow_name| cow_name.to_string())
+            .unwrap_or_else(|| "Unknown Engine".to_string()) ;
 
         // Extract and print the desired information
         tracing::info!("--- User-Agent Details ---");

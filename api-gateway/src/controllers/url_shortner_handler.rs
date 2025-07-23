@@ -12,6 +12,7 @@ use crate::models::url_shorten_models::{Insight, InsightEvent, KeyInsights, Pagi
 use aws_sdk_sqs::{Client};
 use serde_json::to_string;
 use aws_config::BehaviorVersion;
+use crate::controllers::common::get_status;
 
 async fn create_grpc_connection() -> Result<UrlShortnerServiceClient<Channel>, Error> {
     UrlShortnerServiceClient::connect("http://url-shortner-container:9091").await
@@ -49,9 +50,9 @@ pub async fn create_shorten_url(Extension(claims): Extension<Claims>, Form(data)
                 Err(status) => {
                     tracing::info!("Error in gRPC server response: {}", status);
                     Err((
-                        StatusCode::CONFLICT, // the data was conflicting with the database
-                       Json( ErrorResponse {
-                            message: "Error in connecting to gRPC server".to_string(),
+                        get_status(status.code()).await,
+                        Json(ErrorResponse{
+                            message: status.message().to_string(),
                         })
                     ))
                 }
@@ -102,12 +103,10 @@ pub async fn get_urls(Query(params): Query<PaginationParams>,Extension(claims): 
                 Err(status) => {
                     tracing::error!("Error in gRPC server response: {}", status);
                     Err((
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(
-                            ErrorResponse {
-                                message: "Error in getting response from gRPC".to_string(),
-                            }
-                        )
+                        get_status(status.code()).await,
+                        Json(ErrorResponse{
+                            message: status.message().to_string(),
+                        })
                     ))
                 }
             }
@@ -155,12 +154,10 @@ pub async fn delete_url(Path(id): Path<i32>,Extension(claims): Extension<Claims>
                 Err(status) => {
                     tracing::error!("Error in gRPC server response: {}", status);
                     Err((
-                        StatusCode::BAD_REQUEST,
-                        Json(
-                            ErrorResponse {
-                                message: status.message().to_string(),
-                            }
-                        )
+                        get_status(status.code()).await,
+                        Json(ErrorResponse{
+                            message: status.message().to_string(),
+                        })
                     ))
                 }
             }
@@ -325,16 +322,12 @@ pub async fn get_key_insights(Path((shorten_url, page_size, last_evaluated_key))
                         },
                         Err(error) => {
                             tracing::error!("Error in gRPC server response: {}", error);
-                            Err(
-                                (
-                                    StatusCode::INTERNAL_SERVER_ERROR,
-                                    Json(
-                                        ErrorResponse {
-                                            message: "Error in getting response from gRPC".to_string(),
-                                        }
-                                    )
-                                )
-                            )
+                            Err((
+                                get_status(error.code()).await,
+                                Json(ErrorResponse{
+                                    message: error.message().to_string(),
+                                })
+                            ))
                         }
                     }
                 },
