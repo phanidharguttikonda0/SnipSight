@@ -575,38 +575,39 @@ export default function DashboardPage() {
                       </Badge>
                     )}
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
+
+                  <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0 sm:space-x-4 w-full">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="hover:bg-blue-50 hover:text-blue-600"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="hover:bg-blue-50 hover:text-blue-600 w-full sm:w-auto flex items-center justify-center"
                     >
                       <ChevronLeft className="w-4 h-4 mr-1" />
                       Previous
                     </Button>
-                    
-                    <div className="flex items-center space-x-1">
-                      <span className="text-sm text-gray-600">Page</span>
-                      <Badge variant="outline" className="px-3 py-1">
+
+                    <div className="flex items-center justify-center space-x-1 text-sm text-gray-600">
+                      <span>Page</span>
+                      <Badge variant="outline" className="px-3 py-1 text-base">
                         {currentPage}
                       </Badge>
-                      <span className="text-sm text-gray-600">of {totalPages}</span>
+                      <span>of {totalPages}</span>
                     </div>
-                    
+
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage >= totalPages}
-                      className="hover:bg-blue-50 hover:text-blue-600"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage >= totalPages}
+                        className="hover:bg-blue-50 hover:text-blue-600 w-full sm:w-auto flex items-center justify-center"
                     >
                       Next
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
+
                 </div>
               </>
             )}
