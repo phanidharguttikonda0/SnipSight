@@ -1,6 +1,5 @@
-use aws_config::imds::client::error::ImdsError::ErrorResponse as ImdsErrorResponse;
 use axum::extract::{Path, State};
-use axum::{Form, Json};
+use axum::{Json};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use serde::{Serialize, Deserialize};
@@ -34,12 +33,12 @@ pub struct FullCountries {
 }
 
 pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, password)): Path<(String, String)>)
-                             -> Result<impl IntoResponse, (StatusCode, ErrorResponse)>
+                             -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)>
 {
 
     // here we call the service that access the database
     let row: Result<(i32,String, String),_>  = sqlx::query_as("select id,username,password from users where username=$1 OR mail_id=$2")
-        .bind(&username).bind(&username).bind(&password).fetch_one(&state.db_pool).await ;
+        .bind(&username).bind(&username).fetch_one(&state.db_pool).await ;
 
     match row {
         Ok(row) => {
@@ -62,9 +61,9 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
                         Err(
                             (
                                 StatusCode::NON_AUTHORITATIVE_INFORMATION,
-                                    ErrorResponse{
+                                    Json(ErrorResponse{
                                         message: "Invalid Password".to_string()
-                                    }
+                                    })
 
                             )
                         )
@@ -75,9 +74,9 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
                     Err(
                         (
                             StatusCode::INTERNAL_SERVER_ERROR,
-                                ErrorResponse{
+                                Json(ErrorResponse{
                                     message: "not a argon2 hash".to_string()
-                                }
+                                })
 
                         )
                     )
@@ -90,9 +89,9 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
             tracing::error!("error was {}", err);
             Err((
                 StatusCode::UNAUTHORIZED,
-                ErrorResponse {
+                Json(ErrorResponse {
                     message: "Invalid Credentials".to_string(),
-                },
+                }),
             ))
         }
     }
@@ -101,7 +100,7 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
 
 
 pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, password, mail_id, mobile, country_id)): Path<(String, String, String, String, i32)>)
-                             -> Result<impl IntoResponse, (StatusCode, ErrorResponse)>
+                             -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)>
 {
     let hash_password = hash_password(&password) ;
     // here we call the service that access the database
@@ -135,39 +134,39 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
                Some("users_username_key") => {
                    Err((
                        StatusCode::CONFLICT,
-                       ErrorResponse::new("Username already Exists".to_string())
+                       Json(ErrorResponse::new("Username already Exists".to_string()))
                        ))
                },
                Some("users_mail_id_key") => {
                    Err((
                        StatusCode::CONFLICT,
-                       ErrorResponse::new("Email already Exists".to_string())
+                       Json(ErrorResponse::new("Email already Exists".to_string()))
                        ))
                },
                Some("users_mobile_key") => {
                    Err((
                        StatusCode::CONFLICT,
-                       ErrorResponse::new("Mobile already Exists".to_string())
+                       Json(ErrorResponse::new("Mobile already Exists".to_string()))
                    ))
                },
                Some("users_country_id_fkey") => {
                    Err((
                        StatusCode::BAD_REQUEST,
-                       ErrorResponse::new("Invalid Country id".to_string())
+                       Json(ErrorResponse::new("Invalid Country id".to_string()))
                    ))
                },
                Some(c) => {
                    tracing::warn!("Unhandled constraint violation: {}", c);
                    Err((
                        StatusCode::BAD_REQUEST,
-                       ErrorResponse::new("Unhandled Constraint Violation".to_string())
+                       Json(ErrorResponse::new("Unhandled Constraint Violation".to_string()))
                    ))
                },
                None => {
                    tracing::error!("Database error: {}", err);
                    Err((
                        StatusCode::INTERNAL_SERVER_ERROR,
-                       ErrorResponse::new("Database Error".to_string())
+                       Json(ErrorResponse::new("Database Error".to_string()))
                    ))
                }
            }
@@ -176,7 +175,7 @@ pub async fn sign_up_handler(State(state):State<AppState> ,Path((username, passw
            tracing::error!("error was {}", error) ;
            Err((
                StatusCode::INTERNAL_SERVER_ERROR,
-               ErrorResponse::new("Database Error".to_string())
+               Json(ErrorResponse::new("Database Error".to_string()))
            ))
        }
    }
