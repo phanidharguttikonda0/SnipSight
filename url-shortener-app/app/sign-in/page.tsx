@@ -40,35 +40,44 @@ export default function SignInPage() {
       try {
         const response = await authAPI.signIn(formData.username.trim(), formData.password.trim())
 
-        // Extract Authorization header ONLY from response headers (lowercase)
-        const authHeader = response.headers.authorization;
-        console.log("The response headers are ",response.headers) ;
-        toast({
-          title: "Debug: Auth Header",
-          description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
-          variant: "default",
-        });
-        if (!authHeader) {
-          throw new Error("No Authorization header received from server");
-        }
-        localStorage.setItem("authHeader", authHeader);
-        // Create a minimal user object for login
-        let userData = undefined;
-        if (response.data && typeof response.data === 'object' && 'user' in response.data) {
-          userData = (response.data as any).user;
-        }
-        if (!userData) {
-          userData = {
-            username: formData.username,
-            email: "",
-          };
-        }
-        login(authHeader, userData);
+        if (response.status === 200) {
+          // Extract Authorization header ONLY from response headers (lowercase)
+          const authHeader = response.headers.authorization;
+          console.log("The response headers are ",response.headers) ;
+          toast({
+            title: "Debug: Auth Header",
+            description: `response.headers.authorization: ${response.headers.authorization}\nExtracted authHeader: ${authHeader}`,
+            variant: "default",
+          });
+          if (!authHeader) {
+            throw new Error("No Authorization header received from server");
+          }
+          localStorage.setItem("authHeader", authHeader);
+          // Create a minimal user object for login
+          let userData = undefined;
+          if (response.data && typeof response.data === 'object' && 'user' in response.data) {
+            userData = (response.data as any).user;
+          }
+          if (!userData) {
+            userData = {
+              username: formData.username,
+              email: "",
+            };
+          }
+          login(authHeader, userData);
 
-        toast({
-          title: "Welcome back!",
-          description: "You have been signed in successfully.",
-        })
+          toast({
+            title: "Welcome back!",
+            description: "You have been signed in successfully.",
+          })
+        }else{
+          // @ts-ignore
+          toast({
+            title: "Error",
+            description: response.data?.message || "Invalid credentials",
+            variant: "destructive"
+          });
+        }
       } catch (error: any) {
         console.error("Sign in error:", error)
         toast({

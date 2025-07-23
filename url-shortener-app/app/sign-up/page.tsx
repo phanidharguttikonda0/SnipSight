@@ -50,18 +50,24 @@ export default function SignUpPage() {
         description: "Invalid Username format",
         variant: "destructive",
       });
+      setIsLoading(false) ;
+      return;
     } else if (!isValidEmail(formData.mail_id.trim())) {
       toast({
         title: "Error",
         description: "Invalid Mail-Id",
         variant: "destructive",
       });
+      setIsLoading(false) ;
+      return;
     } else if (!isValidMobile(formData.mobile.trim())){
       toast({
         title: "Error",
         description: "Invalid Mobile-Number",
         variant: "destructive",
       });
+      setIsLoading(false) ;
+      return;
     }else{
       try {
         const response = await authAPI.signUp({
