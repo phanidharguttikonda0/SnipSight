@@ -49,79 +49,80 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left side - Hero Content */}
+            {/* Left Side - Hero Content */}
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-6">
-                <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 text-sm font-medium">
+                <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 text-sm font-medium inline-flex items-center">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Trusted by 50,000+ Users Worldwide
                 </Badge>
-                
+
                 <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
                   Transform Your Links Into{" "}
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Powerful Insights
-                  </span>
+            Powerful Insights
+          </span>
                 </h1>
-                
+
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  The most advanced URL shortener with real-time analytics, secure file sharing, 
+                  The most advanced URL shortener with real-time analytics, secure file sharing,
                   and enterprise-grade features. Turn every click into actionable data.
                 </p>
               </div>
 
               {/* Key Benefits */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Feature Cards */}
+                <div className="flex items-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                     <Zap className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Lightning Fast</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">Lightning Fast</h4>
                     <p className="text-sm text-gray-600">Sub-second redirects globally</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+
+                <div className="flex items-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                     <Shield className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Enterprise Security</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">Enterprise Security</h4>
                     <p className="text-sm text-gray-600">Bank-level encryption</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+
+                <div className="flex items-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                     <BarChart3 className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Advanced Analytics</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">Advanced Analytics</h4>
                     <p className="text-sm text-gray-600">Real-time insights & reports</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+
+                <div className="flex items-start space-x-3 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/50">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
                     <Globe className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Global CDN</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">Global CDN</h4>
                     <p className="text-sm text-gray-600">99.9% uptime guarantee</p>
                   </div>
                 </div>
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
                 <Link href="/sign-up" className="flex-1">
                   <Button className="w-full h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300">
                     Start Free Today
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                
+
                 <Link href="/sign-in" className="flex-1">
                   <Button variant="outline" className="w-full h-14 text-lg border-2 hover:bg-gray-50 transition-all duration-300">
                     Sign In
@@ -130,7 +131,7 @@ export default function HomePage() {
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-6 text-sm text-gray-500">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>No credit card required</span>
@@ -146,56 +147,61 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right side - Interactive Demo/Stats */}
-            <div className="lg:pl-12">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
-                
+            {/* Right Side - Demo and Stats */}
+            <div className="w-full px-4 sm:px-6 lg:px-0 xl:pl-12">
+              <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 border border-gray-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+
                 <div className="relative">
-                  <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Join the Revolution</h2>
-                    <p className="text-gray-600">Trusted by industry leaders worldwide</p>
+                  {/* Title */}
+                  <div className="text-center mb-6 sm:mb-8">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                      Join the Revolution
+                    </h2>
+                    <p className="text-sm sm:text-base text-gray-600">
+                      Trusted by industry leaders worldwide
+                    </p>
                   </div>
 
-                  {/* Animated Stats */}
-                  <div className="grid grid-cols-3 gap-6 mb-8">
+                  {/* Stats */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600 mb-1">
-                        {animatedStats.urls.toLocaleString()}+
+                      <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                        {(animatedStats?.urls ?? 0).toLocaleString()}+
                       </div>
                       <div className="text-sm text-gray-600">URLs Shortened</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-600 mb-1">
-                        {animatedStats.clicks.toLocaleString()}+
+                      <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">
+                        {(animatedStats?.clicks ?? 0).toLocaleString()}+
                       </div>
                       <div className="text-sm text-gray-600">Clicks Tracked</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-green-600 mb-1">
-                        {animatedStats.users.toLocaleString()}+
+                      <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1">
+                        {(animatedStats?.users ?? 0).toLocaleString()}+
                       </div>
                       <div className="text-sm text-gray-600">Happy Users</div>
                     </div>
                   </div>
 
-                  {/* Quick Demo */}
+                  {/* Demo */}
                   <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                      <div className="text-sm text-gray-500 mb-2">Your long URL:</div>
+                    <div className="p-3 sm:p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 overflow-x-auto">
+                      <div className="text-sm text-gray-500 mb-1">Your long URL:</div>
                       <div className="text-sm font-mono text-gray-700 truncate">
                         https://example.com/very/long/url/path/that/needs/shortening
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-center">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
                         <ArrowRight className="w-4 h-4 text-white" />
                       </div>
                     </div>
-                    
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                      <div className="text-sm text-gray-500 mb-2">Your SnipSight URL:</div>
+
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 overflow-x-auto">
+                      <div className="text-sm text-gray-500 mb-1">Your SnipSight URL:</div>
                       <div className="text-sm font-mono text-blue-600 font-semibold">
                         snipsight.com/abc123
                       </div>
@@ -203,8 +209,8 @@ export default function HomePage() {
                   </div>
 
                   {/* Features Preview */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <BarChart3 className="w-4 h-4 text-blue-600" />
                         <span className="text-gray-700">Real-time Analytics</span>
