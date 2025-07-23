@@ -85,12 +85,22 @@ pub async fn sign_in_handler(State(state):State<AppState> ,Path((username, passw
 
             
         },
+        Err(Error::RowNotFound) =>{
+            tracing::warn!("No Row Found Error Occurred") ;
+                  Err((
+                      StatusCode::UNAUTHORIZED,
+                      Json(ErrorResponse {
+                          message: "Invalid Credentials".to_string(),
+                      }),
+                  ))
+        },
         Err(err) => {
             tracing::error!("error was {}", err);
+
             Err((
-                StatusCode::UNAUTHORIZED,
+                StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse {
-                    message: "Invalid Credentials".to_string(),
+                    message: "Internal Server Error Occurred".to_string(),
                 }),
             ))
         }
