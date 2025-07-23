@@ -1,6 +1,6 @@
 use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayload, Urls};
 use sqlx::{Error, FromRow, Pool, Postgres, Row};
-use sqlx::postgres::PgRow;
+use sqlx::postgres::{PgDatabaseError, PgRow};
 use tonic::Status;
 use crate::models::{ShortenUrl, UrlModel, OriginalUrl};
 
@@ -14,9 +14,30 @@ pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>
             tracing::info!("The output of the result was {:#?}", result) ;
             Ok(result)
         },
-        Err(error) => {
+        Err(sqlx::Error::Database(error)) => {
             tracing::error!("error while inserting into website_urls was {}",error) ;
-            Err(error.to_string())
+                match error.constraint() {
+                    Some("unique_user_original_url") => {
+                        tracing::warn!("The error got for getting same original url using again") ;
+                        Err("Original Url already exists".to_string())
+                    },
+                    Some("website_urls_shorten_url_key") => {
+                        tracing::warn!("The chosen shorten URL is already in use.");
+                        Err("custom name already exists".to_string())
+                    },
+                    Some(other) => {
+                        tracing::error!("Unhandled constraint: {}", other);
+                        Err(format!("Database constraint violation: {}", other))
+                    },
+                    None => {
+                        tracing::error!("No constraint info: {}", error);
+                        Err("Database error occurred (no constraint info)".into())
+                    }
+                }
+        },
+        Err(err) => {
+            tracing::info!("unExcepted from the Server {}", err) ;
+            Err(err.to_string())
         }
     }
 }
@@ -47,20 +68,13 @@ pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<P
         },
         Err(error) => {
             tracing::error!("Error Occured while getting urls {}",error) ;
-            match error {
-                Error::RowNotFound => {
-                    Err(String::from("No Row found"))
-                },
-                _ => {
-                    Err(String::from("Internal Server Error"))
-                }
-            }
-
+            Err("Internal Server Error".to_string())
         }
     }
 
 }
 
+//* This feature is Currently Not there
 pub async fn update_shorten_url_name(id: i32, name: &str, user_id: i32, db: &Pool<Postgres>) -> Result<bool, String> {
 
     tracing::info!("update shorten url name was called with the id {} and name {}", id, name) ;
@@ -102,11 +116,15 @@ pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<St
             tracing::info!("deletion happened") ;
             Ok(result.shorten_url)
         },
+        Err(Error::RowNotFound) => {
+            tracing::warn!("NO Row Found") ;
+            Err("Row doesn't exists".to_string())
+        },
         Err(error) => {
             tracing::error!("error while deleting the url was {}", error) ;
             match error {
                 Error::Io(err) => {
-                    Err(String::from("error Occured while Communicating with the database") )
+                    Err(String::from("An I/O error Occurred while communicating with database") )
                 },
                 _ => {
                     Err(String::from("An unexpected database error occurred"))

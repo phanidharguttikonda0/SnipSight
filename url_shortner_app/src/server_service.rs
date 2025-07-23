@@ -42,7 +42,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while storing new url: {:?}", err);
-                Err(Status::aborted(String::from("Check Whether the url was not same and custom-name to be unique")))
+                Err(Status::aborted(err))
             }
         }
 

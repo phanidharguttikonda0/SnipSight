@@ -25,3 +25,13 @@ pub struct DeleteInsight{
     pub message_type: String,
     pub shorten_url: String
 }
+
+#[derive(Clone)]
+pub struct TopInsights{
+    pub unique_views: i32,
+    pub top_location: String,
+    pub top_browser: String,
+    pub top_os: String,
+    pub top_device: String,
+    pub top_referrer: String,
+}
