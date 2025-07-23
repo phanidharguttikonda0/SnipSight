@@ -413,30 +413,31 @@ export default function InsightsPage() {
         {/* Detailed Analytics Table */}
         <Card className="border-0 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="flex items-center text-xl">
-                  <BarChart3 className="w-6 h-6 mr-3 text-blue-600" />
+                <CardTitle className="flex flex-wrap items-center text-lg sm:text-xl">
+                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-blue-600" />
                   Detailed Click Analytics
                 </CardTitle>
-                <CardDescription className="text-base mt-1">
+                <CardDescription className="text-sm sm:text-base mt-1">
                   Real-time data showing every interaction with your link
                 </CardDescription>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <Badge variant="outline" className="bg-white">
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="bg-white text-xs sm:text-sm">
                   <Clock className="w-3 h-3 mr-1" />
                   Live Data
                 </Badge>
-                <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+                <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs sm:text-sm">
                   <Zap className="w-3 h-3 mr-1" />
                   Real-time
                 </Badge>
               </div>
             </div>
           </CardHeader>
-          
+
+
           <CardContent className="p-0">
             {insights.length === 0 ? (
               <div className="text-center py-16">
