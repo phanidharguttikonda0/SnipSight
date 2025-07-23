@@ -456,7 +456,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                       <div
-                                          className="truncate font-medium text-gray-900 max-w-[48ch]"
+                                          className="truncate font-medium text-gray-900 max-w-[36ch]"
                                           title={url.original_url}
                                       >
                                         {url.original_url}
