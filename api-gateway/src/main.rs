@@ -34,7 +34,7 @@ async fn main() {
 
     // Build the CORS layer
     let cors = CorsLayer::new()
-        .allow_origin("https://snipsight.phani.services".parse::<HeaderValue>().unwrap()) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
+        .allow_origin("https://web.snipsight.phani.services".parse::<HeaderValue>().unwrap()) // You can use `Exact` or `AllowOrigin::predicate(...)` for specific domains
         .allow_methods(Any)
         .allow_headers(Any);
 
