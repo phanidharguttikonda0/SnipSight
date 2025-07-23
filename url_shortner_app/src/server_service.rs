@@ -42,7 +42,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while storing new url: {:?}", err);
-                Err(Status::aborted(err))
+                Err(err.into())
             }
         }
 
@@ -77,7 +77,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while deleting url: {:?}", err);
-                Err(Status::aborted(err))
+                Err(err.into())
             }
         }
     }
@@ -96,7 +96,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
                 ))
             },
             Err(err) => {
-                Err(Status::internal(format!("{}", err)))
+                Err(err.into())
             }
         }
     }
@@ -118,7 +118,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while incrementing count: {:?}", err);
-                Err(Status::aborted(err))
+                Err(err.into())
             }
         }
     }
@@ -140,7 +140,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while getting original url: {:?}", err);
-                Err(Status::aborted(err))
+                Err(err.into())
             }
         }
     }
@@ -156,7 +156,7 @@ impl UrlShortnerService for UrlShortnerServerServices {
             },
             Err(err) => {
                 tracing::error!("Error while getting insights: {:?}", err);
-                Err(Status::aborted(err))
+                Err(Status::internal(err))
             }
         }
     }

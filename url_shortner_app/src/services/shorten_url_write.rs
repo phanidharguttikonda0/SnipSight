@@ -2,9 +2,9 @@ use proto_definations_snip_sight::generated::url_shortner::{CreateShortenUrlPayl
 use sqlx::{Error, FromRow, Pool, Postgres, Row};
 use sqlx::postgres::{PgDatabaseError, PgRow};
 use tonic::Status;
-use crate::models::{ShortenUrl, UrlModel, OriginalUrl};
+use crate::models::{ShortenUrl, UrlModel, OriginalUrl, ErrorMessage};
 
-pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>) -> Result<(String, i32), String> {
+pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>) -> Result<(String, i32), ErrorMessage> {
 
     let result = sqlx::query_as::<_, (String, i32)>("insert into website_urls (user_id, original_url, shorten_url) values ($1, $2, $3) RETURNING shorten_url,id")
         .bind(payload.user_id).bind(payload.original_url).bind(payload.custom_url)
@@ -19,30 +19,30 @@ pub async fn store_new_url(payload: CreateShortenUrlPayload, db: &Pool<Postgres>
                 match error.constraint() {
                     Some("unique_user_original_url") => {
                         tracing::warn!("The error got for getting same original url using again") ;
-                        Err("Original Url already exists".to_string())
+                        Err(ErrorMessage::new("Original Url already exists".to_string(), 409))
                     },
                     Some("website_urls_shorten_url_key") => {
                         tracing::warn!("The chosen shorten URL is already in use.");
-                        Err("custom name already exists".to_string())
+                        Err(ErrorMessage::new("custom name already exists".to_string(),409))
                     },
                     Some(other) => {
                         tracing::error!("Unhandled constraint: {}", other);
-                        Err(format!("Database constraint violation: {}", other))
+                        Err(ErrorMessage::new(format!("Database constraint violation: {}", other), 500))
                     },
                     None => {
                         tracing::error!("No constraint info: {}", error);
-                        Err("Database error occurred (no constraint info)".into())
+                        Err(ErrorMessage::new("Database error occurred (no constraint info)".into(), 500))
                     }
                 }
         },
         Err(err) => {
             tracing::info!("unExcepted from the Server {}", err) ;
-            Err(err.to_string())
+            Err(ErrorMessage::new(err.to_string(), 500))
         }
     }
 }
 
-pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<Postgres>) -> Result<Vec<Urls>, String> {
+pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<Postgres>) -> Result<Vec<Urls>, ErrorMessage> {
 
     tracing::info!("get urls was called with the user_id {}", user_id) ;
     tracing::info!("page size {} and page number {}", page_size, page_number) ;
@@ -68,7 +68,7 @@ pub async fn get_urls(user_id: i32,page_number: u32, page_size: u32, db: &Pool<P
         },
         Err(error) => {
             tracing::error!("Error Occured while getting urls {}",error) ;
-            Err("Internal Server Error".to_string())
+            Err(ErrorMessage::new("Internal Server Error".to_string(), 500))
         }
     }
 
@@ -105,7 +105,7 @@ pub async fn update_shorten_url_name(id: i32, name: &str, user_id: i32, db: &Poo
     }
 }
 
-pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<String, String> {
+pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<String, ErrorMessage> {
 
     tracing::info!("delete url was called with the id {}", id) ;
     let result = sqlx::query_as::<_, ShortenUrl>("DELETE FROM website_urls WHERE id=$1 AND user_id=$2 RETURNING shorten_url")
@@ -118,16 +118,16 @@ pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<St
         },
         Err(Error::RowNotFound) => {
             tracing::warn!("NO Row Found") ;
-            Err("Row doesn't exists".to_string())
+            Err(ErrorMessage::new("Row doesn't exists".to_string(), 204))
         },
         Err(error) => {
             tracing::error!("error while deleting the url was {}", error) ;
             match error {
                 Error::Io(err) => {
-                    Err(String::from("An I/O error Occurred while communicating with database") )
+                    Err(ErrorMessage::new(String::from("An I/O error Occurred while communicating with database"), 500) )
                 },
                 _ => {
-                    Err(String::from("An unexpected database error occurred"))
+                    Err(ErrorMessage::new(String::from("An unexpected database error occurred"),500))
                 }
             }
         }
@@ -135,7 +135,7 @@ pub async fn delete_url(id: i32, user_id: i32, db: &Pool<Postgres>) -> Result<St
 }
 
 
-pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Result<bool, String> {
+pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Result<bool, ErrorMessage> {
     tracing::info!("increase_view_count was called with the shorten_url {}", shorten_url) ;
     let result = sqlx::query("update website_urls SET view_count=view_count+1 where shorten_url=$1")
         .bind(shorten_url).execute(db).await ;
@@ -151,12 +151,12 @@ pub async fn increase_view_count(shorten_url: &str, db: &Pool<Postgres>) -> Resu
         },
         Err(err) => {
             tracing::error!("The Error was {}", err) ;
-            Err(err.to_string())
+            Err(ErrorMessage::new(err.to_string(), 500))
         }
     }
 }
 
-pub async fn get_original_url_service(shorten_url: &str, db: &Pool<Postgres>) -> Result<String, String> {
+pub async fn get_original_url_service(shorten_url: &str, db: &Pool<Postgres>) -> Result<String, ErrorMessage> {
     tracing::info!("get_original_url was called with the shorten_url {}", shorten_url) ;
     let result = sqlx::query_as::<_, OriginalUrl>
         ("select original_url from website_urls where shorten_url=$1")
@@ -168,7 +168,7 @@ pub async fn get_original_url_service(shorten_url: &str, db: &Pool<Postgres>) ->
         },
         Err(err) => {
             tracing::error!("error was {}", err) ;
-            Err(err.to_string())
+            Err(ErrorMessage::new(err.to_string(), 500))
         }
     }
 }

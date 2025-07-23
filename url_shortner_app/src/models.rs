@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(sqlx::FromRow)]
 pub struct UrlModel {
@@ -35,3 +35,24 @@ pub struct TopInsights{
     pub top_device: String,
     pub top_referrer: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ErrorMessage {
+    pub message: String,
+    pub status_code: i32,
+}
+
+impl ErrorMessage {
+    pub fn new(message: String, status_code: i32) -> Self {
+        Self {
+            message,
+            status_code,
+        }
+    }
+}
+impl From<ErrorMessage> for tonic::Status {
+    fn from(err: ErrorMessage) -> Self {
+        tonic::Status::internal(err.message)
+    }
+}
+

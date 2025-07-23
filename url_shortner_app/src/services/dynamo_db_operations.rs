@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use aws_config::BehaviorVersion;
 use aws_sdk_sqs::Client;
 use proto_definations_snip_sight::generated::url_shortner::{GetInsights, Insight, KeyInsights};
-use crate::models::DeleteInsight;
+use crate::models::{DeleteInsight, ErrorMessage};
 use serde_json::to_string;
 use aws_sdk_dynamodb::Client as DynamoClient;
 use aws_sdk_dynamodb::types::AttributeValue;
@@ -75,7 +75,7 @@ pub async fn get_insights(request : GetInsights, client: &DynamoClient) -> Resul
     }
 }
 
-pub async fn delete_insights(shorten_url : String) -> Result<String, String>{
+pub async fn delete_insights(shorten_url : String) -> Result<String, ErrorMessage>{
     // here we need to add the delete operation to the SQS
     let config = aws_config::load_defaults(BehaviorVersion::v2025_01_17()).await;
     let client = Client::new(&config);
@@ -93,7 +93,7 @@ pub async fn delete_insights(shorten_url : String) -> Result<String, String>{
         },
         Err(err) => {
             tracing::error!("Error sending message to SQS for Delete INSIGHT was {}", err);
-            Err(err.to_string())
+            Err(ErrorMessage::new(format!("Error sending message to SQS for Delete INSIGHT was {}", err),500))
         }
     }
 }
