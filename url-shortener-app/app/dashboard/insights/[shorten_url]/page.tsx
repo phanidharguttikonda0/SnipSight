@@ -465,7 +465,9 @@ export default function InsightsPage() {
                         <TableHead className="font-semibold text-gray-700">Timestamp</TableHead>
                         <TableHead className="font-semibold text-gray-700">Visitor Info</TableHead>
                         <TableHead className="font-semibold text-gray-700">Location</TableHead>
-                        <TableHead className="font-semibold text-gray-700">Technology</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Opened-In</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Device</TableHead>
+                        <TableHead className="font-semibold text-gray-700">OS</TableHead>
                         <TableHead className="font-semibold text-gray-700">Source</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -518,14 +520,21 @@ export default function InsightsPage() {
                                   {insight.browser}
                                 </Badge>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                {getDeviceIcon(insight.device_type)}
-                                <span className="text-sm text-gray-600">{insight.device_type}</span>
-                              </div>
-                              <Badge variant="outline" className="text-xs">
-                                {insight.os}
-                              </Badge>
+
                             </div>
+                          </TableCell>
+
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              {getDeviceIcon(insight.device_type)}
+                              <span className="text-sm text-gray-600">{insight.device_type}</span>
+                            </div>
+                          </TableCell>
+
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {insight.os}
+                            </Badge>
                           </TableCell>
                           
                           <TableCell>
